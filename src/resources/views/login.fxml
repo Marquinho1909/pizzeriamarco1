@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="474.0" prefWidth="773.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.LoginController">
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.LoginController">
   <children>
       <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="102.0" text="Pizzeria Marco">
          <font>
@@ -67,6 +67,6 @@
             <Insets bottom="10.0" />
          </VBox.margin>
       </Label>
-      <Button fx:id="register_btn" mnemonicParsing="false" text="Jetzt registrieren" />
+      <Button fx:id="register_btn" onAction="#changeSceneToRegister" mnemonicParsing="false" text="Jetzt registrieren" />
   </children>
 </VBox>

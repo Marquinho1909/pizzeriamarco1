@@ -16,8 +16,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        JDBCClient JDBC = new JDBCClient();
+        JDBC.initializeDatabase();
         Parent root = FXMLLoader.load(getClass().getResource("../resources/views/login.fxml"));
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("Pizzeria Marco");
+        primaryStage.setMinHeight(400);
+        primaryStage.setMinWidth(640);
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
