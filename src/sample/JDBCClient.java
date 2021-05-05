@@ -106,7 +106,7 @@ public class JDBCClient {
                                 "id INTEGER AUTO_INCREMENT PRIMARY KEY," +
                                 "userid INTEGER," +
                                 "orderdate DATE," +
-                                "FOREIGN KEY(uid) REFERENCES User(id));"
+                                "FOREIGN KEY(userid) REFERENCES User(id));"
                 );
             }
 

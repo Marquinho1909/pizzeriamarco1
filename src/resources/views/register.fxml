@@ -11,101 +11,101 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/15.0.1"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.RegisterController">
+<VBox alignment="TOP_CENTER" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.RegisterController">
    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="93.0" prefWidth="639.0" text="Pizzeria Marco">
       <font>
-         <Font name="System Bold" size="50.0"/>
+         <Font name="System Bold" size="50.0" />
       </font>
    </Label>
    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="61.0" prefWidth="639.0" text="Registrierung">
       <font>
-         <Font size="30.0"/>
+         <Font size="30.0" />
       </font>
    </Label>
    <HBox alignment="CENTER" prefHeight="31.0" prefWidth="640.0">
       <fx:define>
-      <ToggleGroup fx:id="gender_group"/>
+      <ToggleGroup fx:id="gender_group" />
    </fx:define>
-      <RadioButton mnemonicParsing="false" selected="true" userData="m" text="Herr" toggleGroup="$gender_group">
+      <RadioButton mnemonicParsing="false" toggleGroup="$gender_group" selected="true" text="Herr" userData="m">
          <HBox.margin>
-            <Insets right="100.0"/>
+            <Insets right="100.0" />
          </HBox.margin>
       </RadioButton>
-      <RadioButton mnemonicParsing="false" text="Frau" userData="f" toggleGroup="$gender_group">
+      <RadioButton mnemonicParsing="false" text="Frau" toggleGroup="$gender_group" userData="f">
          <HBox.margin>
-            <Insets right="100.0"/>
+            <Insets right="100.0" />
          </HBox.margin>
       </RadioButton>
-      <RadioButton mnemonicParsing="false" text="Divers" userData="d" toggleGroup="$gender_group"/>
+      <RadioButton mnemonicParsing="false" text="Divers" toggleGroup="$gender_group" userData="d" />
    </HBox>
    <HBox alignment="CENTER" prefHeight="40.0">
       <Label prefHeight="17.0" prefWidth="60.0" text="Vorname:">
          <HBox.margin>
-            <Insets right="10.0"/>
+            <Insets right="10.0" />
          </HBox.margin>
       </Label>
       <TextField fx:id="fname_input" prefHeight="25.0" prefWidth="150.0">
          <HBox.margin>
-            <Insets right="30.0"/>
+            <Insets right="30.0" />
          </HBox.margin>
       </TextField>
       <Label prefWidth="60.0" text="Nachname:">
          <HBox.margin>
-            <Insets right="10.0"/>
+            <Insets right="10.0" />
          </HBox.margin>
       </Label>
-      <TextField fx:id="lname_input" prefHeight="25.0" prefWidth="150.0"/>
+      <TextField fx:id="lname_input" prefHeight="25.0" prefWidth="150.0" />
    </HBox>
    <HBox alignment="CENTER" prefHeight="40.0">
       <Label prefHeight="17.0" prefWidth="60.0" text="Straße:">
          <HBox.margin>
-            <Insets right="10.0"/>
+            <Insets right="10.0" />
          </HBox.margin>
       </Label>
       <TextField fx:id="street_input" prefHeight="25.0" prefWidth="150.0">
          <HBox.margin>
-            <Insets right="40.0"/>
+            <Insets right="40.0" />
          </HBox.margin>
       </TextField>
       <Label prefHeight="17.0" prefWidth="50.0" text="Hausnr.:">
          <HBox.margin>
-            <Insets right="10.0"/>
+            <Insets right="10.0" />
          </HBox.margin>
       </Label>
       <TextField fx:id="hnumber_input" prefHeight="25.0" prefWidth="50.0">
          <HBox.margin>
-            <Insets right="15.0"/>
+            <Insets right="15.0" />
          </HBox.margin>
       </TextField>
       <Label prefWidth="25.0" text="PLZ:">
          <HBox.margin>
-            <Insets right="10.0"/>
+            <Insets right="10.0" />
          </HBox.margin>
       </Label>
-      <TextField fx:id="plz_input" prefHeight="25.0" prefWidth="50.0"/>
+      <TextField fx:id="plz_input" prefHeight="25.0" prefWidth="50.0" />
    </HBox>
    <HBox alignment="CENTER" prefHeight="40.0">
       <Label prefWidth="60.0" text="E-Mail:">
          <HBox.margin>
-            <Insets right="10.0"/>
+            <Insets right="10.0" />
          </HBox.margin>
       </Label>
       <TextField fx:id="email_input" prefHeight="25.0" prefWidth="150.0">
          <HBox.margin>
-            <Insets right="30.0"/>
+            <Insets right="30.0" />
          </HBox.margin>
       </TextField>
       <Label prefHeight="17.0" prefWidth="60.0" text="Passwort:">
          <HBox.margin>
-            <Insets right="10.0"/>
+            <Insets right="10.0" />
          </HBox.margin>
       </Label>
-      <PasswordField fx:id="password_input" prefHeight="25.0" prefWidth="150.0"/>
+      <PasswordField fx:id="password_input" prefHeight="25.0" prefWidth="150.0" />
    </HBox>
+   <Label fx:id="error_msg" text="Bitte alle Felder ausfüllen und auf die Korrektheit der E-Mail-Adresse achten" textFill="RED" visible="false" />
    <Button mnemonicParsing="false" onAction="#register" text="Kostenlos registrieren">
       <VBox.margin>
-         <Insets top="20.0"/>
+         <Insets top="20.0" />
       </VBox.margin>
    </Button>
 </VBox>

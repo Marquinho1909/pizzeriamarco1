@@ -51,15 +51,17 @@ public class DishDAO implements DAO<Dish> {
     }
 
     @Override
-    public void save(Dish dish) {
+    public boolean save(Dish dish) {
         try (Connection connection = new JDBCClient().connection) {
             PreparedStatement prep = connection.prepareStatement("INSERT INTO Dish (name, price) VALUES (?,?);");
 
             prep.setString(1, dish.getName());
             prep.setDouble(2, dish.getPrice());
             prep.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 

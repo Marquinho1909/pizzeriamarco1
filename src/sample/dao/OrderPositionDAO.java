@@ -41,8 +41,8 @@ public class OrderPositionDAO implements DAO<OrderPosition> {
     }
 
     @Override
-    public void save(OrderPosition orderPosition) {
-
+    public boolean save(OrderPosition orderPosition) {
+        return false;
     }
 
     public void save(OrderPosition orderPosition, int orderid) {

@@ -69,7 +69,7 @@ public class UserDAO implements DAO<User> {
     }
 
     @Override
-    public void save(User user) {
+    public boolean save(User user) {
         try (Connection connection = new JDBCClient().connection) {
             int aId = 0;
             if (user.getClass() == Customer.class) {
@@ -105,8 +105,10 @@ public class UserDAO implements DAO<User> {
                 prep.setInt(7, aId);
 
             prep.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -194,6 +196,7 @@ public class UserDAO implements DAO<User> {
 
             ResultSet rs = prep.executeQuery();
             if (rs.first()) {
+                System.out.println(rs.getString("email"));
                 if (rs.getString("usertype").equals("Admin"))
                     user = convertToAdmin(rs);
                 else

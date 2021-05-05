@@ -7,7 +7,7 @@ public interface DAO<T> {
 
     Optional<T> get(int id);
     List<T> getAll();
-    void save(T t);
+    boolean save(T t);
     void update(int id, T t);
     void delete(int id);
 }

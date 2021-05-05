@@ -39,10 +39,10 @@ public class OrderDAO implements DAO<Order> {
     }
 
     @Override
-    public void save(Order order) {
+    public boolean save(Order order) {
         try (Connection connection = new JDBCClient().connection) {
             PreparedStatement prep = connection.prepareStatement("INSERT INTO Dishorder(userid, orderdate) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS);
-            prep.setInt(1, UserDAO.loggedInUser.getId());
+            prep.setInt(1, order.getUser().getId());
             prep.setDate(2, new Date(order.getOrderDate().getTime()));
 
             prep.execute();
@@ -57,15 +57,17 @@ public class OrderDAO implements DAO<Order> {
                 PreparedStatement prepP = connection.prepareStatement("INSERT INTO OrderPosition(orderid, dishid, amount) VALUES (?,?,?);");
                 prepP.setInt(1, oId);
                 prepP.setInt(2, op.getDish().getId());
-                prep.setInt(3, op.getAmount());
+                prepP.setInt(3, op.getAmount());
 
-                prep.execute();
+                prepP.execute();
             }
-
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
+
 
     @Override
     public void update(int id, Order order) {
