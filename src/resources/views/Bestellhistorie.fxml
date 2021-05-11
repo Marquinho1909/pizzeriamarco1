@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.canvas.*?>
 <?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="857.0" prefWidth="1010.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="816.0" prefWidth="1187.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.LoginController">
    <children>
-      <Text layoutX="319.0" layoutY="90.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Pizzeria Marco" wrappingWidth="347.27734375">
+      <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="102.0" text="Pizzeria Marco">
          <font>
             <Font name="System Bold" size="50.0" />
          </font>
-      </Text>
-      <Text layoutX="390.0" layoutY="159.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Bestellhistorie" wrappingWidth="229.205078125">
+      </Label>
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Bestellhistorie" wrappingWidth="229.205078125">
          <font>
             <Font size="33.0" />
          </font>
       </Text>
-      <TableView layoutX="106.0" layoutY="229.0" prefHeight="458.0" prefWidth="798.0">
-        <columns>
-          <TableColumn minWidth="0.0" prefWidth="0.0" text="C2" />
-            <TableColumn prefWidth="128.0" text="Datum" />
-            <TableColumn prefWidth="112.0" text="Uhrzeit" />
-            <TableColumn prefWidth="436.0" text="Bestellung" />
-            <TableColumn prefWidth="121.0" text="Gesamtpreis" />
-        </columns>
-      </TableView>
-      <ScrollBar layoutX="904.0" layoutY="229.0" orientation="VERTICAL" prefHeight="458.0" prefWidth="22.0" />
+      <HBox alignment="CENTER">
+         <children>
+            <Label>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </Label>
+            <TableView prefHeight="458.0" prefWidth="798.0">
+               <columns>
+                  <TableColumn minWidth="0.0" prefWidth="0.0" text="C2" />
+                  <TableColumn prefWidth="128.0" text="Datum" />
+                  <TableColumn prefWidth="112.0" text="Uhrzeit" />
+                  <TableColumn prefWidth="436.0" text="Bestellung" />
+                  <TableColumn prefWidth="121.0" text="Gesamtpreis" />
+               </columns>
+            </TableView>
+            <ScrollBar orientation="VERTICAL" prefHeight="458.0" prefWidth="22.0" />
+         </children>
+         <VBox.margin>
+            <Insets top="15.0" />
+         </VBox.margin>
+      </HBox>
    </children>
-</AnchorPane>
+</VBox>
