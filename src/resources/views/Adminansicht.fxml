@@ -6,14 +6,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" prefHeight="816.0" prefWidth="1187.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.LoginController">
+<VBox alignment="CENTER" prefHeight="1363.0" prefWidth="1187.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.LoginController">
    <children>
-      <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="102.0" text="Pizzeria Marco">
+      <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="102.0" text="Pizzeria Marco" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="50.0" />
          </font>
       </Label>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Adminansicht" wrappingWidth="202.205078125">
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Adminansicht" textAlignment="CENTER" wrappingWidth="202.205078125">
          <font>
             <Font size="33.0" />
          </font>
@@ -21,7 +21,7 @@
             <Insets />
          </VBox.margin>
       </Text>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Benutzerübersicht" wrappingWidth="194.205078125">
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Benutzerübersicht" textAlignment="CENTER" wrappingWidth="194.205078125">
          <font>
             <Font size="24.0" />
          </font>
@@ -70,7 +70,7 @@
             <Insets top="15.0" />
          </VBox.margin>
       </Button>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Bestellungsübersicht" wrappingWidth="221.205078125">
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Bestellungsübersicht" textAlignment="CENTER" wrappingWidth="221.205078125">
          <font>
             <Font size="24.0" />
          </font>
@@ -96,6 +96,76 @@
                </columns>
             </TableView>
             <ScrollBar orientation="VERTICAL" prefHeight="200.0" prefWidth="22.0" />
+         </children>
+         <VBox.margin>
+            <Insets top="15.0" />
+         </VBox.margin>
+      </HBox>
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Gerichte" textAlignment="CENTER" wrappingWidth="194.205078125">
+         <font>
+            <Font size="24.0" />
+         </font>
+         <VBox.margin>
+            <Insets top="30.0" />
+         </VBox.margin>
+      </Text>
+      <HBox alignment="CENTER" prefHeight="212.0" prefWidth="1187.0">
+         <children>
+            <Label>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </Label>
+            <TableView prefHeight="180.0" prefWidth="933.0">
+               <columns>
+                  <TableColumn prefWidth="150.0" text="ID" />
+                  <TableColumn minWidth="0.0" prefWidth="0.0" text="C2" />
+                  <TableColumn prefWidth="356.0" text="Name" />
+                  <TableColumn prefWidth="328.0" text="Kategorie" />
+                  <TableColumn prefWidth="98.0" text="Preis" />
+               </columns>
+            </TableView>
+            <ScrollBar orientation="VERTICAL" prefHeight="200.0" prefWidth="22.0" />
+         </children>
+         <VBox.margin>
+            <Insets top="15.0" />
+         </VBox.margin>
+      </HBox>
+      <Button mnemonicParsing="false" text="Gericht löschen">
+         <VBox.margin>
+            <Insets top="15.0" />
+         </VBox.margin>
+      </Button>
+      <HBox alignment="CENTER">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" textAlignment="CENTER" wrappingWidth="112.205078125">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Text>
+            <Label>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </Label>
+            <TextField prefHeight="39.0" prefWidth="249.0" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Preis:" textAlignment="CENTER" wrappingWidth="98.205078125">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Text>
+            <TextField prefHeight="39.0" prefWidth="101.0" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Kategorie:" textAlignment="CENTER" wrappingWidth="158.205078125">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Text>
+            <TextField prefHeight="39.0" prefWidth="249.0" />
+            <Button mnemonicParsing="false" text="Gericht erstellen">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
          </children>
          <VBox.margin>
             <Insets top="15.0" />
