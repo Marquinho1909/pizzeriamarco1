@@ -2,6 +2,7 @@ package sample.dao;
 
 import sample.JDBCClient;
 import sample.dto.Admin;
+import sample.dto.Coupon;
 import sample.dto.Customer;
 import sample.dto.User;
 
@@ -10,12 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class UserDAO implements DAO<User> {
-    public static User loggedInUser = null;
+public class UserDAO {
+    CouponDAO couponDAO = new CouponDAO();
+    Connection connection;
 
-    @Override
+    public UserDAO() {
+        connection = new JDBCClient().connection;
+    }
+
     public Optional<User> get(int id) {
-        try (Connection connection = new JDBCClient().connection) {
+        try {
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id WHERE u.id=" + id + ";");
             if (result.first())
                 return Optional.of(convertToCostumerOrAdmin(result));
@@ -25,12 +30,10 @@ public class UserDAO implements DAO<User> {
         return Optional.empty();
     }
 
-    @Override
     public List<User> getAll() {
         List<User> users = new ArrayList<>();
-        try (Connection connection = new JDBCClient().connection) {
+        try {
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id;");
-
             while (result.next())
                 users.add(convertToCostumerOrAdmin(result));
 
@@ -40,11 +43,10 @@ public class UserDAO implements DAO<User> {
         return users;
     }
 
-    public List<User> getAllCustomers() {
-        List<User> users = new ArrayList<>();
-        try (Connection connection = new JDBCClient().connection) {
-            ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id WHERE u.usertype='Costumer';");
-
+    public List<Customer> getAllCustomers() {
+        List<Customer> users = new ArrayList<>();
+        try {
+            ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id WHERE u.usertype='Customer';");
             while (result.next())
                 users.add(convertToCostumer(result));
 
@@ -56,9 +58,8 @@ public class UserDAO implements DAO<User> {
 
     public List<User> getAllAdmin() {
         List<User> users = new ArrayList<>();
-        try (Connection connection = new JDBCClient().connection) {
+        try {
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER WHERE usertype='Admin';");
-
             while (result.next())
                 users.add(convertToAdmin(result));
 
@@ -68,55 +69,86 @@ public class UserDAO implements DAO<User> {
         return users;
     }
 
-    @Override
-    public boolean save(User user) {
-        try (Connection connection = new JDBCClient().connection) {
+    public Coupon getCustomerCoupon(Customer customer) {
+        try {
+            PreparedStatement prepA = connection.prepareStatement("SELECT id FROM Address WHERE street=? AND housenumber=? AND zipcode=?;");
+            prepA.setString(1, customer.getAddress().getStreet());
+            prepA.setString(2, customer.getAddress().getHouseNumber());
+            prepA.setInt(3, customer.getAddress().getZipCode());
+            ResultSet rs = prepA.executeQuery();
+            if (rs.first())
+                return couponDAO.getCouponByAddressId(rs.getInt(1));
+            else throw new SQLException();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public int save(User user) {
+        try {
             int aId = 0;
             if (user.getClass() == Customer.class) {
                 Customer customer = (Customer) user;
-                PreparedStatement prepA = connection.prepareStatement("INSERT INTO Address (street, housenumber, zipcode) VALUES (?,?,?);", Statement.RETURN_GENERATED_KEYS);
+                // Searches for address in case it already exists
+                PreparedStatement prepA = connection.prepareStatement("SELECT id FROM Address WHERE street=? AND housenumber=? AND zipcode=?;");
                 prepA.setString(1, customer.getAddress().getStreet());
                 prepA.setString(2, customer.getAddress().getHouseNumber());
                 prepA.setInt(3, customer.getAddress().getZipCode());
-                prepA.execute();
-
-                ResultSet rs = prepA.getGeneratedKeys();
-
-                if (rs.first())
+                ResultSet rs = prepA.executeQuery();
+                if (rs.first()) {
+                    // When address already exists, no coupon created
                     aId = rs.getInt(1);
-                else
-                    throw new SQLException("GENERATED KEY NOT FOUND");
+                } else {
+                    // When address is new, address and coupon are created
+                    prepA = connection.prepareStatement("INSERT INTO Address (street, housenumber, zipcode) VALUES (?,?,?);", Statement.RETURN_GENERATED_KEYS);
+                    prepA.setString(1, customer.getAddress().getStreet());
+                    prepA.setString(2, customer.getAddress().getHouseNumber());
+                    prepA.setInt(3, customer.getAddress().getZipCode());
+                    prepA.execute();
+                    rs = prepA.getGeneratedKeys();
+
+                    if (rs.first()) {
+                        aId = rs.getInt(1);
+                        couponDAO.saveByAddressId(new Coupon(0.1), aId);
+                    } else
+                        throw new SQLException("GENERATED KEY NOT FOUND");
+                }
             }
 
             PreparedStatement prep = aId != 0 ?connection.prepareStatement(
                     "INSERT INTO User(firstname, lastname, gender, email, password, usertype, addressid) " +
-                            "VALUES(?,?,?,?,?,?,?);") :
+                            "VALUES(?,?,?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS) :
                     connection.prepareStatement(
                     "INSERT INTO User(firstname, lastname, gender, email, password, usertype) " +
-                            "VALUES(?,?,?,?,?,?);");
+                            "VALUES(?,?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS);
 
             prep.setString(1, user.getFirstName());
             prep.setString(2, user.getLastname());
             prep.setString(3, "" + user.getGender());
             prep.setString(4, user.getEmail());
             prep.setString(5, user.getPassword());
-            prep.setString(6, user.getClass() == Admin.class ? "Admin" : "User");
+            prep.setString(6, user.getClass() == Admin.class ? "Admin" : "Customer");
             if (aId != 0)
                 prep.setInt(7, aId);
 
             prep.execute();
-            return true;
+            ResultSet rs = prep.getGeneratedKeys();
+            if (rs.next())
+                return rs.getInt(1);
+            else
+                throw new SQLException();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return 0;
         }
     }
 
-    @Override
-    public void update(int id, User user) {
-        try (Connection connection = new JDBCClient().connection) {
-            ResultSet rs = connection.createStatement().executeQuery("SELECT addressid FROM User WHERE id=" + id + ";");
+    public boolean update(int id, User user) {
+        try {
             if (user.getClass() == Customer.class) {
+                ResultSet rs = connection.createStatement().executeQuery("SELECT addressid FROM User WHERE id=" + id + ";");
                 int aId;
                 Customer customer = (Customer) user;
                 if (rs.first())
@@ -137,20 +169,24 @@ public class UserDAO implements DAO<User> {
             prep.setString(3, "" + user.getGender());
             prep.setString(4, user.getEmail());
             prep.setString(5, user.getPassword());
-            prep.setInt(6, user.getId());
+            prep.setInt(6, id);
 
             prep.executeUpdate();
+            System.out.println("UPDATED USER WITH ID " + id);
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    @Override
-    public void delete(int id) {
-        try (Connection connection = new JDBCClient().connection) {
+    public boolean delete(int id) {
+        try {
             connection.createStatement().executeUpdate("DELETE FROM User WHERE id=" + id + ";");
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -196,7 +232,6 @@ public class UserDAO implements DAO<User> {
 
             ResultSet rs = prep.executeQuery();
             if (rs.first()) {
-                System.out.println(rs.getString("email"));
                 if (rs.getString("usertype").equals("Admin"))
                     user = convertToAdmin(rs);
                 else
@@ -206,5 +241,15 @@ public class UserDAO implements DAO<User> {
             e.printStackTrace();
         }
         return user;
+    }
+
+    public boolean makeCustomerAdmin(int id) {
+        try (Connection connection = new JDBCClient().connection) {
+            connection.createStatement().executeUpdate("UPDATE User SET usertype='Admin' WHERE id=" + id);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -1,15 +1,24 @@
 package sample.dto;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Dish {
     private int id;
     private String name;
+    private List<Category> categories;
     private double price;
 
-    public Dish(int id, String name, double price) {
+    public Dish(int id, String name, List<Category> categories, double price) {
         this.id = id;
         this.name = name;
+        this.categories = categories;
+        this.price = price;
+    }
+
+    public Dish(String name, List<Category> categories, double price) {
+        this.name = name;
+        this.categories = categories;
         this.price = price;
     }
 
@@ -33,6 +42,10 @@ public class Dish {
     public void setName(String name) {
         this.name = name;
     }
+
+    public List<Category> getCategories() { return categories; }
+
+    public void setCategories(List<Category> categories) { this.categories = categories; }
 
     public double getPrice() {
         return price;

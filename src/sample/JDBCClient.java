@@ -1,12 +1,15 @@
 package sample;
 
+import sample.dao.CategoryDAO;
 import sample.dao.DishDAO;
 import sample.dao.UserDAO;
 import sample.dto.Admin;
+import sample.dto.Category;
 import sample.dto.Customer;
 import sample.dto.Dish;
 
 import java.sql.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class JDBCClient {
@@ -15,18 +18,15 @@ public class JDBCClient {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
     private static final String DRIVER = "com.mysql.jdbc.Driver";
+    public Connection connection;
 
     Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    public JDBCClient() {
-    }
-
-    public Connection connection = connect();
+    public JDBCClient() { connection = connect();}
 
     public Connection connect() {
         Connection conn;
         String url = HOST + DB;
-
         try {
             Class.forName(DRIVER);
             logger.info("DRIVER " + DRIVER + " [OK]");
@@ -35,7 +35,6 @@ public class JDBCClient {
             e.printStackTrace();
             return null;
         }
-
         try {
             logger.info("CONNECTING TO DATABASE");
             conn = DriverManager.getConnection(url, USERNAME, PASSWORD);
@@ -45,7 +44,6 @@ public class JDBCClient {
             e.printStackTrace();
             return null;
         }
-
         return conn;
     }
 
@@ -59,7 +57,17 @@ public class JDBCClient {
     public void createTablesIfNotExist() {
         try {
             DatabaseMetaData md = connection.getMetaData();
-            logger.info("CREATING TABLES");
+            logger.info("CREATING TABLES IF NEEDED");
+
+            if (!md.getTables(null, null, "Category", null).first()) {
+                logger.info("TABLE CREATED: CATEGORY");
+                connection.createStatement().execute(
+                        "CREATE TABLE Category(" +
+                                "id INTEGER AUTO_INCREMENT PRIMARY KEY," +
+                                "name VARCHAR(50));"
+                );
+                createDummyCategories();
+            }
 
             if (!md.getTables(null, null, "Dish", null).first()) {
                 logger.info("TABLE CREATED: DISH");
@@ -68,6 +76,18 @@ public class JDBCClient {
                                 "id INTEGER AUTO_INCREMENT PRIMARY KEY," +
                                 "name VARCHAR(50)," +
                                 "price DECIMAL(4,2));"
+                );
+            }
+
+            if (!md.getTables(null, null, "Dish_Category", null).first()) {
+                logger.info("TABLE CREATED: DISH_CATEGORY");
+                connection.createStatement().execute(
+                        "CREATE TABLE Dish_Category(" +
+                                "dishid INTEGER NOT NULL," +
+                                "categoryid INTEGER NOT NULL," +
+                                "PRIMARY KEY(dishid, categoryid)," +
+                                "FOREIGN KEY(dishid) REFERENCES Dish(id)," +
+                                "FOREIGN KEY(categoryid) REFERENCES Category(id));"
                 );
                 createDummyDishes();
             }
@@ -80,6 +100,17 @@ public class JDBCClient {
                                 "street VARCHAR(50)," +
                                 "housenumber VARCHAR(20)," +
                                 "zipcode INTEGER);"
+                );
+            }
+
+            if (!md.getTables(null, null, "Coupon", null).first()) {
+                logger.info("TABLE CREATED: COUPON");
+                connection.createStatement().execute(
+                        "CREATE TABLE Coupon(" +
+                                "id INTEGER AUTO_INCREMENT PRIMARY KEY," +
+                                "value DECIMAL(4,2)," +
+                                "addressid INTEGER," +
+                                "FOREIGN KEY(addressid) REFERENCES Address(id));"
                 );
             }
 
@@ -106,6 +137,7 @@ public class JDBCClient {
                                 "id INTEGER AUTO_INCREMENT PRIMARY KEY," +
                                 "userid INTEGER," +
                                 "orderdate DATE," +
+                                "discount DECIMAL(4,2)," +
                                 "FOREIGN KEY(userid) REFERENCES User(id));"
                 );
             }
@@ -122,29 +154,41 @@ public class JDBCClient {
                                 "FOREIGN KEY(dishid) REFERENCES Dish(id));"
                 );
             }
+
         } catch (SQLException e) {
             logger.severe("TABLES COULD NOT BE CREATED");
             e.printStackTrace();
         }
     }
 
+    private void createDummyCategories() {
+        CategoryDAO dao = new CategoryDAO();
+        dao.save(new Category("Pizza"));
+        dao.save(new Category("Pasta"));
+        dao.save(new Category("Salat"));
+        dao.save(new Category("Lasagne"));
+        dao.save(new Category("Vegetarisch"));
+    }
+
     public void createDummyUsers() {
         UserDAO dao = new UserDAO();
         dao.save(new Customer("Debby", "Dummy", new Customer.Address("Dummy Street", "13a", 11111), 'f', "user1@dummy.com", "topsecret"));
         dao.save(new Customer("Max", "Mustermann", new Customer.Address("Dummy Street", "13b", 11111), 'm', "user2@dummy.com", "topsecret"));
-        dao.save(new Admin("Hannah", "Tönjes",'f', "admin2@dummy.com", "topsecret"));
-        dao.save(new Admin("Marco", "Lenz",'m', "admin1@dummy.com", "topsecret"));
+        dao.save(new Admin("Hannah", "Tönjes", 'f', "admin2@dummy.com", "topsecret"));
+        dao.save(new Admin("Marco", "Lenz", 'm', "admin1@dummy.com", "topsecret"));
     }
 
     public void createDummyDishes() {
         logger.info("CREATING DUMMY DISHES");
         DishDAO dishdao = new DishDAO();
         Dish[] dishes = {
-                new Dish("Pizza Hawaii", 6.30),
-                new Dish("Pizza Tuna", 7.40),
-                new Dish("Pizza Margherita", 4.0)};
+                new Dish("Pizza Hawaii", List.of(new Category("Pizza")), 6.30 ),
+                new Dish("Pizza Tuna", List.of(new Category("Pizza")),7.40),
+                new Dish("Pizza Margherita", List.of(new Category("Pizza"), new Category("Vegetarisch")),4.0),
+                new Dish("Lasagne á la Marco", List.of(new Category("Lasagne")),20),
+                new Dish("Caesar Salad", List.of(new Category("Salat")),20)};
 
-        for (Dish d: dishes)
+        for (Dish d : dishes)
             dishdao.save(d);
     }
 

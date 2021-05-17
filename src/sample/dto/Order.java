@@ -9,6 +9,7 @@ public class Order {
     private User user;
     private Date orderDate;
     private List<OrderPosition> orderpositions;
+    private double discount;
 
     public Order(int id, List<OrderPosition> orderpositions, User user) {
         this.id = id;
@@ -16,11 +17,19 @@ public class Order {
         this.user = user;
         this.orderDate = new Date();
     }
+    public Order(int id, List<OrderPosition> orderpositions, Date orderDate, User user, double discount) {
+        this.id = id;
+        this.orderpositions = orderpositions;
+        this.user = user;
+        this.orderDate = orderDate;
+        this.discount = discount;
+    }
 
-    public Order(List<OrderPosition> orderpositions, User user) {
+    public Order(List<OrderPosition> orderpositions, Date orderDate, User user, double discount) {
         this.orderpositions = orderpositions;
         this.user = user;
         this.orderDate = new Date();
+        this.discount = discount;
     }
 
     public int getId() {
@@ -54,6 +63,10 @@ public class Order {
     public void setOrderDate(Date orderDate) {
         this.orderDate = orderDate;
     }
+
+    public double getDiscount() { return discount; }
+
+    public void setDiscount(double discount) { this.discount = discount; }
 
     @Override
     public boolean equals(Object o) {

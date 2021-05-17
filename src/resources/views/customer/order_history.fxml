@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<VBox alignment="CENTER" prefHeight="816.0" prefWidth="1187.0" xmlns="http://javafx.com/javafx/15.0.1"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.OrderHistoryController">
+   <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="102.0" text="Pizzeria Marco">
+      <font>
+         <Font name="System Bold" size="50.0"/>
+      </font>
+   </Label>
+   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Bestellhistorie" wrappingWidth="229.205078125">
+      <font>
+         <Font size="33.0"/>
+      </font>
+   </Text>
+   <HBox alignment="CENTER">
+      <VBox.margin>
+         <Insets top="15.0"/>
+      </VBox.margin>
+      <ScrollPane fitToHeight="true" fitToWidth="true" HBox.hgrow="ALWAYS">
+         <HBox.margin>
+            <Insets left="50.0" right="50.0"/>
+         </HBox.margin>
+         <TableView fx:id="table_order">
+            <columns>
+               <TableColumn editable="false" text="Datum">
+                  <cellValueFactory>
+                     <PropertyValueFactory property="date"/>
+                  </cellValueFactory>
+               </TableColumn>
+               <TableColumn editable="false" text="Bestellung">
+                  <cellValueFactory>
+                     <PropertyValueFactory property="orderlist"/>
+                  </cellValueFactory>
+               </TableColumn>
+               <TableColumn editable="false" text="Gesamtpreis">
+                  <cellValueFactory>
+                     <PropertyValueFactory property="total"/>
+                  </cellValueFactory>
+               </TableColumn>
+            </columns>
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+         </TableView>
+      </ScrollPane>
+   </HBox>
+</VBox>

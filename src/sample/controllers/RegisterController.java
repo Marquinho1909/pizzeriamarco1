@@ -3,6 +3,7 @@ package sample.controllers;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -12,23 +13,41 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import sample.dao.UserDAO;
 import sample.dto.Customer;
+import sample.dto.UserSession;
+
 import java.io.IOException;
+import java.net.URL;
+import java.util.Objects;
+import java.util.ResourceBundle;
 
-public class RegisterController {
-    @FXML private ToggleGroup gender_group;
-    @FXML private TextField fname_input;
-    @FXML private TextField lname_input;
-    @FXML private TextField street_input;
-    @FXML private TextField hnumber_input;
-    @FXML private TextField plz_input;
-    @FXML private TextField email_input;
-    @FXML private PasswordField password_input;
-    @FXML private Label error_msg;
+public class RegisterController implements Initializable {
+    @FXML
+    private ToggleGroup gender_group;
+    @FXML
+    private TextField fname_input;
+    @FXML
+    private TextField lname_input;
+    @FXML
+    private TextField street_input;
+    @FXML
+    private TextField hnumber_input;
+    @FXML
+    private TextField plz_input;
+    @FXML
+    private TextField email_input;
+    @FXML
+    private PasswordField password_input;
+    @FXML
+    private Label error_msg;
 
-    UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
 
-    public void register(ActionEvent actionEvent) throws IOException {
-        System.out.println("TRYING REGISTERING WITH: " + fname_input.getText() + ", " + lname_input.getText() + ", " + email_input.getText() + ", " + password_input.getText());
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        userDAO = new UserDAO();
+    }
+
+    public void register(ActionEvent actionEvent) {
         if (isFormValid()) {
             error_msg.setVisible(false);
             userDAO.save(new Customer(
@@ -43,17 +62,31 @@ public class RegisterController {
                     email_input.getText(),
                     password_input.getText()
             ));
-            UserDAO.loggedInUser = userDAO.getUserByEmailAndPassword(email_input.getText(), password_input.getText());
-            Stage stage = (Stage) ((Node)actionEvent.getSource()).getScene().getWindow();
+            UserSession.currentSession().setUser(userDAO.getUserByEmailAndPassword(email_input.getText(), password_input.getText()));
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
 
-            stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("../../resources/views/menu.fxml"))));
-            stage.setMaximized(true);
+            try {
+                stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/customer/customer_page.fxml")))));
+                stage.setMaximized(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             error_msg.setVisible(true);
         }
     }
 
-    public boolean isFormValid() {
+    public void returnToLoginPage(ActionEvent actionEvent) {
+        try {
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/login.fxml")))));
+            stage.setMaximized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean isFormValid() {
         return fname_input.getText().length() > 0 &&
                 lname_input.getText().length() > 0 &&
                 street_input.getText().length() > 0 &&
@@ -63,4 +96,5 @@ public class RegisterController {
                 email_input.getText().contains("@") &&
                 password_input.getText().length() > 0;
     }
+
 }

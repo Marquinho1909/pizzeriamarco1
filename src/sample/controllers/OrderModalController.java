@@ -2,46 +2,62 @@ package sample.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
+import sample.dao.CouponDAO;
 import sample.dao.OrderDAO;
 import sample.dao.UserDAO;
-import sample.dto.Order;
-import sample.dto.OrderPosition;
-import java.util.ArrayList;
-import java.util.List;
+import sample.dto.*;
 
-public class OrderModalController {
-    @FXML private CheckBox code_check;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
+
+public class OrderModalController implements Initializable {
+    @FXML private CheckBox coupon_check;
     @FXML private ListView<String> overview;
 
-    private OrderStatus status = OrderStatus.INITIALIZED;
+    private ModalStatus status = ModalStatus.INITIALIZED;
     private List<OrderPosition> dishesInCart = new ArrayList<>();
+    private Coupon coupon;
+    private OrderDAO orderDAO;
+    private UserDAO userDAO;
+    private CouponDAO couponDAO;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        orderDAO = new OrderDAO();
+        userDAO = new UserDAO();
+        couponDAO = new CouponDAO();
+
+        coupon = userDAO.getCustomerCoupon((Customer) UserSession.currentSession().getUser());
+        coupon_check.setVisible(coupon != null);
+    }
 
     /**
      * displays orderpositions of dishesInCart in list, calculates total including possible coupon
      */
     public void displayDishes() {
-        status = OrderStatus.INITIALIZED;
+        status = ModalStatus.INITIALIZED;
 
         double total = 0;
         overview.getItems().clear();
 
         for (OrderPosition o: dishesInCart) {
             total += o.getDish().getPrice()*o.getAmount();
-            overview.getItems().add(
-                    "+" + MenuController.transformPrice(o.getDish().getPrice()*o.getAmount()) + "   " + o.getAmount() + "x " + o.getDish().getName()
-            );
+            overview.getItems().add("+" + CustomerPageController.transformPrice(o.getDish().getPrice()*o.getAmount()) + "   " + o.getAmount() + "x " + o.getDish().getName());
         }
-        if (code_check.isSelected()) {
-            overview.getItems().add("-" + MenuController.transformPrice(total * 0.1) + "   " + "10% Willkommens-Gutschein");
+        if (coupon_check.isSelected()) {
+            overview.getItems().add("-" + CustomerPageController.transformPrice(total * 0.1) + "   " + "10% Willkommens-Gutschein");
             total *= 0.9;
         }
-        overview.getItems().add("");
-        overview.getItems().add("_______________________");
-        overview.getItems().add("Total: " + MenuController.transformPrice(total));
+
+        overview.getItems().addAll("", "_______________________", "Total: " + CustomerPageController.transformPrice(total));
     }
 
     /**
@@ -49,26 +65,30 @@ public class OrderModalController {
      * @param actionEvent for getting stage
      */
     public void closeModal(ActionEvent actionEvent) {
-        status = OrderStatus.CLOSED;
+        status = ModalStatus.CLOSED;
         ((Stage) ((Node)actionEvent.getSource()).getScene().getWindow()).close();
     }
 
     /**
      * saves order in database, sets status accordingly and closes modal
-     * TODO calculate coupon
-     * @param actionEvent
+     *
+     * @param actionEvent ae
      */
     public void order(ActionEvent actionEvent) {
-        OrderDAO orderDAO = new OrderDAO();
         if (orderDAO.save(
                 new Order(
                         dishesInCart,
-                        UserDAO.loggedInUser
+                        new Date(),
+                        UserSession.currentSession().getUser(),
+                        coupon_check.isSelected() ? coupon.getValue() : 0
                 )
-        ))
-            status = OrderStatus.SUCCESS;
+        ) != 0) {
+            if (coupon != null && couponDAO.delete(coupon.getId()))
+            coupon = null;
+            status = ModalStatus.SUCCESS;
+        }
         else
-            status = OrderStatus.FAILURE;
+            status = ModalStatus.FAILURE;
         ((Stage) ((Node)actionEvent.getSource()).getScene().getWindow()).close();
     }
 
@@ -76,11 +96,7 @@ public class OrderModalController {
         this.dishesInCart = dishesInCart;
     }
 
-    public OrderStatus getStatus() {
+    public ModalStatus getStatus() {
         return status;
-    }
-
-    enum OrderStatus {
-        INITIALIZED, SUCCESS, FAILURE, CLOSED,
     }
 }

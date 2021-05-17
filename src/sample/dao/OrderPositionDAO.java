@@ -12,20 +12,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class OrderPositionDAO implements DAO<OrderPosition> {
+public class OrderPositionDAO {
     DishDAO dishDAO = new DishDAO();
 
-    @Override
+    Connection connection;
+
+    public OrderPositionDAO() {
+        connection = new JDBCClient().connection;
+    }
+
     public Optional<OrderPosition> get(int id) {
-        try (Connection connection = new JDBCClient().connection) {
+        try {
             ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM OrderPosition WHERE id=" + ";");
-
             if (rs.first()) {
-                OrderPosition op = new OrderPosition(
-                        null,
-                        rs.getInt("amount")
-                );
-
+                OrderPosition op = new OrderPosition(null, rs.getInt("amount"));
                 dishDAO.get(rs.getInt("dishid")).ifPresent(op::setDish);
                 return Optional.of(op);
             }
@@ -35,40 +35,39 @@ public class OrderPositionDAO implements DAO<OrderPosition> {
         return Optional.empty();
     }
 
-    @Override
     public List<OrderPosition> getAll() {
         return null;
     }
 
-    @Override
-    public boolean save(OrderPosition orderPosition) {
-        return false;
+    public int save(OrderPosition orderPosition) {
+        return 0;
     }
 
     public void save(OrderPosition orderPosition, int orderid) {
-        try (Connection connection = new JDBCClient().connection) {
+        try {
             PreparedStatement prep = connection.prepareStatement("INSERT INTO OrderPosition(orderid, dishid, amount) VALUES(?, ?, ?)");
             prep.setInt(1, orderid);
             prep.setInt(2, orderPosition.getDish().getId());
             prep.setInt(3, orderPosition.getAmount());
+            prep.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public void update(int id, OrderPosition orderPosition) {
+    public boolean update(int id, OrderPosition orderPosition) {
+        return false;
         //TODO
     }
 
-    @Override
-    public void delete(int id) {
+    public boolean delete(int id) {
+        return false;
         //TODO
     }
 
     public List<OrderPosition> getAllByOrderId(int orderid) {
         List<OrderPosition> orderPositions = new ArrayList<>();
-        try (Connection connection = new JDBCClient().connection) {
+        try {
             ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM OrderPosition o JOIN Dish d ON o.dishid=d.id WHERE orderid=" + orderid + ";");
             while (rs.next()) {
                 orderPositions.add(
@@ -77,6 +76,7 @@ public class OrderPositionDAO implements DAO<OrderPosition> {
                                 new Dish(
                                         rs.getInt("dishid"),
                                         rs.getString("name"),
+                                        new CategoryDAO().getAllByDishId(rs.getInt("dishid")),
                                         rs.getDouble("price")
                                 ),
                                 rs.getInt("amount")

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.MenuController">
+<VBox alignment="CENTER" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.CustomerPageController">
    <MenuBar VBox.vgrow="NEVER">
       <Menu fx:id="menu_btn" mnemonicParsing="false" text=",">
          <MenuItem mnemonicParsing="false" text="Bestellhistorie" onAction="#showOrderHistory"/>

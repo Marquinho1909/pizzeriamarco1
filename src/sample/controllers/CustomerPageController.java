@@ -15,17 +15,18 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.dao.DishDAO;
-import sample.dao.UserDAO;
 import sample.dto.Dish;
 import sample.dto.OrderPosition;
+import sample.dto.UserSession;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
-public class MenuController implements Initializable {
+public class CustomerPageController implements Initializable {
     @FXML
     private Label error_msg;
     @FXML
@@ -37,11 +38,11 @@ public class MenuController implements Initializable {
     @FXML
     private Menu menu_btn;
 
-    private List<OrderPosition> dishesInCart = new ArrayList<>();
+    private final List<OrderPosition> dishesInCart = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        menu_btn.setText(UserDAO.loggedInUser.getLastname() + ", " + UserDAO.loggedInUser.getFirstName());
+        menu_btn.setText(UserSession.currentSession().getUser().getLastname() + ", " + UserSession.currentSession().getUser().getFirstName());
         synchronizeDishlist();
     }
 
@@ -54,13 +55,13 @@ public class MenuController implements Initializable {
         boolean bcolor = false;
 
         for (Dish dish : dishes) {
-            Label lName = new Label(dish.getId() + ". " + dish.getName());
-            lName.setPrefWidth(500);
+            Label name = new Label(dish.getId() + ". " + dish.getName());
+            name.setPrefWidth(500);
 
-            Label lPrice = new Label(transformPrice(dish.getPrice()));
-            lPrice.setPrefWidth(70);
-            lPrice.setContentDisplay(ContentDisplay.CENTER);
-            lPrice.setAlignment(Pos.CENTER);
+            Label price = new Label(transformPrice(dish.getPrice()));
+            price.setPrefWidth(70);
+            price.setContentDisplay(ContentDisplay.CENTER);
+            price.setAlignment(Pos.CENTER);
 
             Spinner<Integer> sAmount = new Spinner<>();
             sAmount.setPrefWidth(80);
@@ -71,7 +72,7 @@ public class MenuController implements Initializable {
             btn.setPrefWidth(100);
             btn.setOnAction((e) -> addToCart(dish, sAmount.getValue()));
 
-            HBox hBox = new HBox(lName, lPrice, sAmount, btn);
+            HBox hBox = new HBox(name, price, sAmount, btn);
             hBox.setAlignment(Pos.CENTER);
             hBox.setPrefHeight(40);
             hBox.setSpacing(10);
@@ -105,20 +106,26 @@ public class MenuController implements Initializable {
      * displays all orderpositions of list dishesInCart in GUI
      */
     public void synchronizeCart() {
-        cart.getChildren().clear();
         double total = 0;
         boolean bcolor = false;
+
+        cart.getChildren().clear();
+
         for (OrderPosition o : dishesInCart) {
             total += o.getDish().getPrice() * o.getAmount();
+
+            //name
             Label name = new Label(o.getAmount() + " x " + o.getDish().getId() + ". " + o.getDish().getName());
             name.setPrefWidth(185);
             HBox.setHgrow(name, Priority.ALWAYS);
 
+            //price
             Label price = new Label(transformPrice(o.getDish().getPrice() * o.getAmount()));
             price.setAlignment(Pos.CENTER);
             price.setContentDisplay(ContentDisplay.CENTER);
             price.setPrefWidth(40);
 
+            //delete button
             Button btn = new Button("Entfernen");
             btn.setPrefWidth(80);
             btn.setOnAction((e) -> {
@@ -131,6 +138,7 @@ public class MenuController implements Initializable {
             hbox.setPrefHeight(40);
             hbox.setSpacing(10);
 
+            //for switching background color every second row
             if (bcolor = !bcolor)
                 hbox.setStyle("-fx-background-color: #e3e3e3;");
             else
@@ -162,8 +170,7 @@ public class MenuController implements Initializable {
     /**
      * opens ordermodal and handles responds after modal closure through its status
      *
-     * @param actionEvent
-     * @throws IOException
+     * @param actionEvent ae
      */
     public void openOrderModal(ActionEvent actionEvent) {
         if (dishesInCart.isEmpty()) {
@@ -172,7 +179,7 @@ public class MenuController implements Initializable {
         }
         error_msg.setVisible(false);
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/ordermodal.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/ordermodal.fxml"));
             Parent root = loader.load();
 
             OrderModalController controller = loader.getController();
@@ -186,7 +193,7 @@ public class MenuController implements Initializable {
             modal.initModality(Modality.APPLICATION_MODAL);
             modal.showAndWait();
 
-            if (controller.getStatus() == OrderModalController.OrderStatus.SUCCESS) {
+            if (controller.getStatus() == ModalStatus.SUCCESS) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Erfolgreich");
                 alert.setContentText("Ihre Bestellung wurde erfolgreich aufgegeben");
@@ -194,7 +201,7 @@ public class MenuController implements Initializable {
                 alert.show();
                 dishesInCart.clear();
                 synchronizeCart();
-            } else if (controller.getStatus() == OrderModalController.OrderStatus.FAILURE) {
+            } else if (controller.getStatus() == ModalStatus.FAILURE) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Fehler");
                 alert.setContentText("Ein Fehler ist aufgetreten, Ihre Bestellung konnte nicht aufgegeben werden.");
@@ -212,17 +219,63 @@ public class MenuController implements Initializable {
 
     }
 
-    public void showOrderHistory(ActionEvent actionEvent) {
-        //TODO
+    public void showOrderHistory() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/order_history.fxml"));
+            Parent root = loader.load();
+
+            Stage main = (Stage) dishlist.getScene().getWindow();
+            Stage modal = new Stage();
+            modal.setScene(new Scene(root));
+            modal.initOwner(main);
+            modal.initModality(Modality.APPLICATION_MODAL);
+            modal.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void openAccountEditModal(ActionEvent actionEvent) {
-        //TODO
+    public void openAccountEditModal() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/customer_profile_edit_modal.fxml"));
+            Parent root = loader.load();
+
+            ProfileEditModalController controller = loader.getController();
+
+            Stage main = (Stage) dishlist.getScene().getWindow();
+            Stage modal = new Stage();
+            modal.setScene(new Scene(root));
+            modal.initOwner(main);
+            modal.initModality(Modality.APPLICATION_MODAL);
+            modal.showAndWait();
+
+            if (controller.getStatus() == ModalStatus.SUCCESS) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Erfolgreich");
+                alert.setContentText("Änderungen wurden gespeichert");
+                alert.getButtonTypes().setAll(ButtonType.OK);
+                alert.show();
+                menu_btn.setText(UserSession.currentSession().getUser().getLastname() + ", " + UserSession.currentSession().getUser().getFirstName());
+            } else if (controller.getStatus() == ModalStatus.FAILURE) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Fehler");
+                alert.setContentText("Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.");
+                alert.getButtonTypes().setAll(ButtonType.OK);
+                alert.show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Fehler");
+            alert.setContentText("Ein Fehler ist aufgetreten, bitte wenden Sie sich an den nicht vorhandenen Support.");
+            alert.getButtonTypes().setAll(ButtonType.OK);
+            alert.show();
+        }
     }
 
     public void logout() throws IOException {
         Stage stage = (Stage) dishlist.getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("../../resources/views/login.fxml"))));
-        UserDAO.loggedInUser = null;
+        stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/login.fxml")))));
+        UserSession.currentSession().cleanUserSession();
     }
 }

@@ -2,21 +2,27 @@ package sample.dto;
 
 public class Customer extends User {
     private Address address;
+    private Coupon coupon;
 
-    public Customer(int id, String firstName, String lastname, Address address, char gender, String email, String password) {
-        super(id, firstName, lastname, gender, email, password);
-        this.address = address;
-    }
     public Customer(String firstName, String lastname, Address address, char gender, String email, String password) {
         super(firstName, lastname, gender, email, password);
         this.address = address;
     }
+    public Customer(int id, String firstName, String lastname, Address address, char gender, String email, String password) {
+        super(id, firstName, lastname, gender, email, password);
+        this.address = address;
+    }
+    public Customer(Coupon coupon, String firstName, String lastname, Address address, char gender, String email, String password) {
+        super(firstName, lastname, gender, email, password);
+        this.address = address;
+        this.coupon = coupon;
+    }
 
+
+    public Coupon getCoupon() { return coupon; }
     public Address getAddress() {
         return address;
     }
-
-    public void setAddress(Address address) { this.address = address; }
 
     @Override
     public String toString() {
@@ -45,25 +51,11 @@ public class Customer extends User {
         public String getStreet() {
             return street;
         }
-
-        public void setStreet(String street) {
-            this.street = street;
-        }
-
         public String getHouseNumber() {
             return houseNumber;
         }
-
-        public void setHouseNumber(String houseNumber) {
-            this.houseNumber = houseNumber;
-        }
-
         public int getZipCode() {
             return zipCode;
-        }
-
-        public void setZipCode(int zipCode) {
-            this.zipCode = zipCode;
         }
 
         @Override
