@@ -19,17 +19,10 @@ public class Main extends Application {
         JDBCClient JDBC = new JDBCClient();
         JDBC.initializeDatabase();
         Parent root = FXMLLoader.load(getClass().getResource("../resources/views/login.fxml"));
-        Parent root2 = FXMLLoader.load(getClass().getResource("../resources/views/login.fxml"));
         primaryStage.setTitle("Pizzeria Marco");
         primaryStage.setMinHeight(400);
         primaryStage.setMinWidth(640);
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
-        Stage anotheStage = new Stage();
-        anotheStage.setTitle("Pizzeria Marco");
-        anotheStage.setMinHeight(400);
-        anotheStage.setMinWidth(640);
-        anotheStage.setScene(new Scene(root2));
-        anotheStage.show();
     }
 }
