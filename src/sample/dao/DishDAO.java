@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class DishDAO {
+/**
+ * DAO for Dish
+ */
+public class DishDAO extends DAO {
     CategoryDAO categoryDAO = new CategoryDAO();
     Connection connection;
 
@@ -17,8 +20,13 @@ public class DishDAO {
         connection = new JDBCClient().connection;
     }
 
-    public Optional<Dish> get(int id) {
-        try {
+    /**
+     * returns dish by its id
+     * @param id of dish
+     * @return dish
+     * @throws SQLException sql exception
+     */
+    public Optional<Dish> get(int id) throws SQLException {
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Dish WHERE id=" + id + ";");
             if (result.first()) {
                 return Optional.of(new Dish(
@@ -28,16 +36,16 @@ public class DishDAO {
                         result.getDouble("price")
                 ));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         return Optional.empty();
     }
 
-    public List<Dish> getAll() {
+    /**
+     * returns all dishes in database
+     * @return list of found dishes
+     * @throws SQLException sql exception
+     */
+    public List<Dish> getAll() throws SQLException {
         List<Dish> dishes = new ArrayList<>();
-
-        try {
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Dish;");
             while (result.next()) {
                 dishes.add(new Dish(
@@ -47,14 +55,16 @@ public class DishDAO {
                         result.getDouble("price")
                 ));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         return dishes;
     }
 
-    public int save(Dish dish) {
-        try {
+    /**
+     * saves dish
+     * @param dish to be saved
+     * @return generated id key
+     * @throws SQLException sql exception
+     */
+    public int save(Dish dish) throws SQLException {
             int dishKey;
             int categoryKey = 0;
 
@@ -85,39 +95,15 @@ public class DishDAO {
                     prep.execute();
                 }
             return dishKey;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
     }
 
-    public boolean update(int id, Dish dish) {
-        try {
-            ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Dish WHERE id=" + id + ";");
-            if (result.first()) {
-                int dId = result.getInt("id");
-                PreparedStatement prep = connection.prepareStatement("UPDATE Dish SET name=?, price=? WHERE id=?");
-
-                prep.setString(1, dish.getName());
-                prep.setDouble(2, dish.getPrice());
-                prep.setInt(3, dId);
-                prep.executeUpdate();
-            }
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean delete(int id) {
-        try {
+    /**
+     * deletes dish by its id
+     * @param id of dish to be deleted
+     * @throws SQLException sql exception
+     */
+    public void delete(int id) throws SQLException {
             connection.createStatement().execute("DELETE FROM Dish_Category WHERE dishid=" + id + ";");
             connection.createStatement().execute("DELETE FROM Dish WHERE id=" + id + ";");
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 }

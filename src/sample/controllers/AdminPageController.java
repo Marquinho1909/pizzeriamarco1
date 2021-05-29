@@ -4,7 +4,6 @@ import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -12,6 +11,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.TableView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import sample.AlertService;
+import sample.DAOFactory;
+import sample.ModalService;
 import sample.dao.DishDAO;
 import sample.dao.OrderDAO;
 import sample.dao.UserDAO;
@@ -19,6 +21,7 @@ import sample.dto.*;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -39,20 +42,24 @@ public class AdminPageController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        userDAO = new UserDAO();
-        orderDAO = new OrderDAO();
-        dishDAO = new DishDAO();
+        userDAO = (UserDAO) DAOFactory.getInstance().getDAO("User");
+        orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO("Order");
+        dishDAO = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
 
-        menu_btn.setText(UserSession.currentSession().getUser().getLastname() + ", " + UserSession.currentSession().getUser().getFirstName());
-        updateCustomerTable();
-        updateOrderTable();
-        updateDishTable();
+        menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+        try {
+            updateCustomerTable();
+            updateOrderTable();
+            updateDishTable();
+        } catch (SQLException e) {
+            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
+        }
     }
 
     /**
      * gets all customers and displays them in table
      */
-    public void updateCustomerTable() {
+    public void updateCustomerTable() throws SQLException {
         table_user.getItems().clear();
 
         List<Customer> customers = userDAO.getAllCustomers();
@@ -70,7 +77,7 @@ public class AdminPageController implements Initializable {
     /**
      * gets all orders and displays them in table
      */
-    public void updateOrderTable() {
+    public void updateOrderTable() throws SQLException {
         table_order.getItems().clear();
 
         List<Order> orders = orderDAO.getAll();
@@ -87,7 +94,7 @@ public class AdminPageController implements Initializable {
     /**
      * gets all dishes and displays them in table
      */
-    public void updateDishTable() {
+    public void updateDishTable() throws SQLException {
         table_dish.getItems().clear();
 
         List<Dish> dishes = dishDAO.getAll();
@@ -103,97 +110,58 @@ public class AdminPageController implements Initializable {
     /**
      * converts an customer to admin
      */
-    public void makeUserAdmin() {
+    public void makeUserAdmin() throws SQLException {
         TableCustomer tc = table_user.getSelectionModel().getSelectedItem();
         if (tc == null) return;
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("User zum Admin machen");
-        alert.setContentText("Wenn der User " + tc.getFirstname() + " " + tc.getLastname() +
+        ButtonType result = AlertService.showAlert(Alert.AlertType.CONFIRMATION, "User zum Admin machen", "Wenn der User " + tc.getFirstname() + " " + tc.getLastname() +
                 " zum Admin ernannt wird, wird er sämtliche Rechte haben und kann nicht mehr als Kunde agieren. " +
-                "Wollen Sie trotzdem fortfahren?");
-        alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-        alert.showAndWait();
+                "Wollen Sie trotzdem fortfahren?", ButtonType.YES, ButtonType.NO);
 
-        if (alert.getResult().equals(ButtonType.YES) && userDAO.makeCustomerAdmin(tc.getId()))
+        if (result.equals(ButtonType.YES)) {
+            userDAO.makeCustomerAdmin(tc.getId());
             updateCustomerTable();
-    }
-
-    public void openDishCreationModal() {
-        try {
-            Stage modal = new Stage();
-            modal.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/admin/dish_creation_modal.fxml")))));
-            modal.initOwner(table_dish.getScene().getWindow());
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.showAndWait();
-            updateDishTable();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public void logout() {
-        try {
-            Stage stage = (Stage) table_dish.getScene().getWindow();
-            stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/login.fxml")))));
-            UserSession.currentSession().cleanUserSession();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void openDishCreationModal() throws IOException, SQLException {
+        Stage modal = new Stage();
+        modal.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/admin/dish_creation_modal.fxml")))));
+        modal.initOwner(table_dish.getScene().getWindow());
+        modal.initModality(Modality.APPLICATION_MODAL);
+        modal.showAndWait();
+        updateDishTable();
     }
 
-    public void openAccountEditModal() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/admin/admin_profile_edit_modal.fxml"));
-            Parent root = loader.load();
-
-            ProfileEditModalController controller = loader.getController();
-
-            Stage main = (Stage) table_dish.getScene().getWindow();
-            Stage modal = new Stage();
-            modal.setScene(new Scene(root));
-            modal.initOwner(main);
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.showAndWait();
-
-            if (controller.getStatus() == ModalStatus.SUCCESS) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Erfolgreich");
-                alert.setContentText("Änderungen wurden gespeichert");
-                alert.getButtonTypes().setAll(ButtonType.OK);
-                alert.show();
-                menu_btn.setText(UserSession.currentSession().getUser().getLastname() + ", " + UserSession.currentSession().getUser().getFirstName());
-            } else if (controller.getStatus() == ModalStatus.FAILURE) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Fehler");
-                alert.setContentText("Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.");
-                alert.getButtonTypes().setAll(ButtonType.OK);
-                alert.show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Fehler");
-            alert.setContentText("Ein Fehler ist aufgetreten, bitte wenden Sie sich an den nicht vorhandenen Support.");
-            alert.getButtonTypes().setAll(ButtonType.OK);
-            alert.show();
-        }
+    public void logout() throws IOException {
+        Stage stage = (Stage) table_dish.getScene().getWindow();
+        stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/login.fxml")))));
+        UserSessionSingleton.currentSession().cleanUserSession();
     }
 
-    public void deleteDish() {
+    public void openAccountEditModal() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/admin/admin_profile_edit_modal.fxml"));
+
+        ModalController.ModalStatus result = ModalService.openModal((Stage) table_dish.getScene().getWindow(), loader, loader.load());
+
+        if (result == ModalController.ModalStatus.SUCCESS) {
+            AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Änderungen wurden gespeichert", ButtonType.OK);
+            menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+        } else if (result == ModalController.ModalStatus.FAILURE)
+            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.", ButtonType.OK);
+    }
+
+    public void deleteDish() throws SQLException {
         TableDish td = table_dish.getSelectionModel().getSelectedItem();
 
         if (td == null) return;
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Gericht löschen");
-        alert.setContentText("Soll das Gericht " + td.getName() + " wirklich gelöscht werden?");
-        alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-        alert.showAndWait();
+        ButtonType result = AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Gericht löschen", "Soll das Gericht " + td.getName() + " wirklich gelöscht werden?", ButtonType.YES, ButtonType.NO);
 
-        if (alert.getResult().equals(ButtonType.YES) && new DishDAO().delete(td.getId()))
+        if (result.equals(ButtonType.YES)) {
+            dishDAO.delete(td.getId());
             updateDishTable();
-
+        }
     }
 
     /**

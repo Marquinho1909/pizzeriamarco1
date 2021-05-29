@@ -11,12 +11,14 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
+import sample.DAOFactory;
 import sample.dao.UserDAO;
 import sample.dto.Customer;
-import sample.dto.UserSession;
+import sample.dto.UserSessionSingleton;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -44,10 +46,15 @@ public class RegisterController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        userDAO = new UserDAO();
+        userDAO = (UserDAO) DAOFactory.getInstance().getDAO("User");
     }
 
-    public void register(ActionEvent actionEvent) {
+    /**
+     * creates customer if form is valid and redirects to customer page
+     * @param actionEvent ae
+     * @throws SQLException sql exception
+     */
+    public void register(ActionEvent actionEvent) throws SQLException {
         if (isFormValid()) {
             error_msg.setVisible(false);
             userDAO.save(new Customer(
@@ -62,7 +69,7 @@ public class RegisterController implements Initializable {
                     email_input.getText(),
                     password_input.getText()
             ));
-            UserSession.currentSession().setUser(userDAO.getUserByEmailAndPassword(email_input.getText(), password_input.getText()));
+            UserSessionSingleton.currentSession().setUser(userDAO.getUserByEmailAndPassword(email_input.getText(), password_input.getText()));
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
 
             try {
@@ -76,16 +83,23 @@ public class RegisterController implements Initializable {
         }
     }
 
+    /**
+     * redirects to login page
+     * @param actionEvent ae
+     */
     public void returnToLoginPage(ActionEvent actionEvent) {
         try {
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/login.fxml")))));
-            stage.setMaximized(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * returns if input fields are valid
+     * @return if all of input is valid
+     */
     private boolean isFormValid() {
         return fname_input.getText().length() > 0 &&
                 lname_input.getText().length() > 0 &&

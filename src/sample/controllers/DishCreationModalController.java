@@ -7,17 +7,20 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import sample.AlertService;
+import sample.DAOFactory;
 import sample.dao.CategoryDAO;
 import sample.dao.DishDAO;
 import sample.dto.Category;
 import sample.dto.Dish;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DishCreationController implements Initializable {
+public class DishCreationModalController extends ModalController implements Initializable {
     public Spinner<Double> price_input;
     public TextField name_input;
     public Label error_msg;
@@ -30,15 +33,25 @@ public class DishCreationController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        categoryDAO = new CategoryDAO();
-        dishDAO = new DishDAO();
+        categoryDAO = (CategoryDAO) DAOFactory.getInstance().getDAO("Category");
+        dishDAO = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
 
         error_msg.setVisible(false);
         price_input.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(1, 20, 1.0, 0.1));
-        displayCategories();
+        try {
+            displayCategories();
+        } catch (SQLException throwables) {
+            setStatus(ModalStatus.FAILURE);
+            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
+        }
     }
 
-    public void save(ActionEvent actionEvent) {
+    /**
+     * saves input as dish if input is valid
+     * @param actionEvent ae
+     * @throws SQLException sql exception
+     */
+    public void save(ActionEvent actionEvent) throws SQLException {
         if (name_input.getText().equals("") || price_input.getValue() <= 0) {
             error_msg.setText("Bitte alle Felder ausfüllen");
             error_msg.setVisible(true);
@@ -53,14 +66,24 @@ public class DishCreationController implements Initializable {
                 checked_categories.add((Category) cb.getUserData());
         }
         dishDAO.save(new Dish(name_input.getText(), checked_categories, price_input.getValue()));
+        setStatus(ModalStatus.SUCCESS);
         ((Stage) ((Node) actionEvent.getSource()).getScene().getWindow()).close();
     }
 
+    /**
+     * closes modal when cancelled by user
+     * @param actionEvent ae
+     */
     public void cancel(ActionEvent actionEvent) {
+        setStatus(ModalStatus.CLOSED);
         ((Stage) ((Node) actionEvent.getSource()).getScene().getWindow()).close();
     }
 
-    private void displayCategories() {
+    /**
+     * displays all categories in list
+     * @throws SQLException sql exception
+     */
+    private void displayCategories() throws SQLException {
         categories_list.getChildren().clear();
         categories = categoryDAO.getAll();
 
@@ -73,7 +96,11 @@ public class DishCreationController implements Initializable {
         }
     }
 
-    public void createCategory() {
+    /**
+     * creates category from input if input is valid
+     * @throws SQLException sql exception
+     */
+    public void createCategory() throws SQLException {
         String cInput = category_input.getText();
         if (cInput.equals("")) {
             error_msg.setText("Das Feld ist leer");

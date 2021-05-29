@@ -29,16 +29,13 @@ public class JDBCClient {
         String url = HOST + DB;
         try {
             Class.forName(DRIVER);
-            logger.info("DRIVER " + DRIVER + " [OK]");
         } catch (ClassNotFoundException e) {
             logger.severe("DRIVER FAILED");
             e.printStackTrace();
             return null;
         }
         try {
-            logger.info("CONNECTING TO DATABASE");
             conn = DriverManager.getConnection(url, USERNAME, PASSWORD);
-            logger.info("CONNECTION SUCCESSFUL");
         } catch (SQLException e) {
             logger.severe("CONNECTION FAILED");
             e.printStackTrace();
@@ -161,7 +158,7 @@ public class JDBCClient {
         }
     }
 
-    private void createDummyCategories() {
+    private void createDummyCategories() throws SQLException {
         CategoryDAO dao = new CategoryDAO();
         dao.save(new Category("Pizza"));
         dao.save(new Category("Pasta"));
@@ -170,7 +167,7 @@ public class JDBCClient {
         dao.save(new Category("Vegetarisch"));
     }
 
-    public void createDummyUsers() {
+    public void createDummyUsers() throws SQLException {
         UserDAO dao = new UserDAO();
         dao.save(new Customer("Debby", "Dummy", new Customer.Address("Dummy Street", "13a", 11111), 'f', "user1@dummy.com", "topsecret"));
         dao.save(new Customer("Max", "Mustermann", new Customer.Address("Dummy Street", "13b", 11111), 'm', "user2@dummy.com", "topsecret"));
@@ -178,7 +175,7 @@ public class JDBCClient {
         dao.save(new Admin("Marco", "Lenz", 'm', "admin1@dummy.com", "topsecret"));
     }
 
-    public void createDummyDishes() {
+    public void createDummyDishes() throws SQLException {
         logger.info("CREATING DUMMY DISHES");
         DishDAO dishdao = new DishDAO();
         Dish[] dishes = {

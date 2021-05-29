@@ -7,65 +7,53 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 
-public class CouponDAO {
+/**
+ * DAO for Coupon
+ */
+public class CouponDAO extends DAO {
     Connection connection;
 
-    public CouponDAO() {
-        connection = new JDBCClient().connection;
-    }
+    public CouponDAO() { connection = new JDBCClient().connection; }
 
-    public Optional<Coupon> get(int id) {
-        return Optional.empty();
-    }
-
-    public List<Coupon> getAll() {
-        return null;
-    }
-
-    public int save(Coupon coupon) {
-        return 0;
-    }
-
-    public boolean saveByAddressId(Coupon coupon, int addressid) {
-        try {
+    /**
+     * saves coupon with given address id
+     * @param coupon to be saved
+     * @param addressid of address
+     * @throws SQLException sql exception
+     */
+    public void saveByAddressId(Coupon coupon, int addressid) throws SQLException {
             PreparedStatement prep = connection.prepareStatement("INSERT INTO Coupon (value, addressid) VALUES (?,?);");
             prep.setDouble(1, coupon.getValue());
             prep.setInt(2, addressid);
             prep.execute();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
-    public Coupon getCouponByAddressId(int addressid) {
-        try {
+    /**
+     * returns coupon by address id
+     * @param addressid to find coupon
+     * @return found coupon or null if coupon was already used
+     * @throws SQLException sql exception
+     */
+    public Optional<Coupon> getCouponByAddressId(int addressid) throws SQLException {
             ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM Coupon WHERE addressid=" + addressid);
             if (rs.first())
                 // When coupon exists
-                return new Coupon(
+                return Optional.of(new Coupon(
                         rs.getInt("id"),
                         rs.getDouble("value")
-                );
-            else return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
+                ));
+            else return Optional.empty();
     }
 
-    public boolean delete(int id) {
-        try {
+    /**
+     * deletes coupon by its id when user uses coupon for discount
+     * @param id of coupon
+     * @throws SQLException sql exception
+     */
+    public void delete(int id) throws SQLException {
             connection.createStatement().execute("DELETE FROM Coupon WHERE id=" + id);
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
 }

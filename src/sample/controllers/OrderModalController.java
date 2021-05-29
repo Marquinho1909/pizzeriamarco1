@@ -4,38 +4,48 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
+import sample.AlertService;
+import sample.DAOFactory;
 import sample.dao.CouponDAO;
 import sample.dao.OrderDAO;
 import sample.dao.UserDAO;
 import sample.dto.*;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class OrderModalController implements Initializable {
+public class OrderModalController extends ModalController implements Initializable {
     @FXML private CheckBox coupon_check;
     @FXML private ListView<String> overview;
 
-    private ModalStatus status = ModalStatus.INITIALIZED;
     private List<OrderPosition> dishesInCart = new ArrayList<>();
     private Coupon coupon;
+
     private OrderDAO orderDAO;
     private UserDAO userDAO;
     private CouponDAO couponDAO;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        orderDAO = new OrderDAO();
-        userDAO = new UserDAO();
-        couponDAO = new CouponDAO();
+        orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO("Order");
+        userDAO = (UserDAO) DAOFactory.getInstance().getDAO("User");
+        couponDAO = (CouponDAO) DAOFactory.getInstance().getDAO("Coupon");
 
-        coupon = userDAO.getCustomerCoupon((Customer) UserSession.currentSession().getUser());
+        try {
+            coupon = userDAO.getCustomerCoupon((Customer) UserSessionSingleton.currentSession().getUser()).orElse(null);
+        } catch (SQLException throwables) {
+            setStatus(ModalStatus.FAILURE);
+            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
+        }
         coupon_check.setVisible(coupon != null);
     }
 
@@ -43,7 +53,7 @@ public class OrderModalController implements Initializable {
      * displays orderpositions of dishesInCart in list, calculates total including possible coupon
      */
     public void displayDishes() {
-        status = ModalStatus.INITIALIZED;
+        setStatus(ModalStatus.INITIALIZED);
 
         double total = 0;
         overview.getItems().clear();
@@ -65,7 +75,7 @@ public class OrderModalController implements Initializable {
      * @param actionEvent for getting stage
      */
     public void closeModal(ActionEvent actionEvent) {
-        status = ModalStatus.CLOSED;
+        setStatus(ModalStatus.CLOSED);
         ((Stage) ((Node)actionEvent.getSource()).getScene().getWindow()).close();
     }
 
@@ -74,29 +84,27 @@ public class OrderModalController implements Initializable {
      *
      * @param actionEvent ae
      */
-    public void order(ActionEvent actionEvent) {
+    public void order(ActionEvent actionEvent) throws SQLException {
         if (orderDAO.save(
                 new Order(
                         dishesInCart,
                         new Date(),
-                        UserSession.currentSession().getUser(),
+                        UserSessionSingleton.currentSession().getUser(),
                         coupon_check.isSelected() ? coupon.getValue() : 0
                 )
         ) != 0) {
-            if (coupon != null && couponDAO.delete(coupon.getId()))
-            coupon = null;
-            status = ModalStatus.SUCCESS;
+            if (coupon != null) {
+                couponDAO.delete(coupon.getId());
+                coupon = null;
+            }
+            setStatus(ModalStatus.SUCCESS);
         }
         else
-            status = ModalStatus.FAILURE;
+            throw new SQLException("ORDER COULD NOT BE CREATED OR NOT KEY WAS RETURNED PROPERLY");
         ((Stage) ((Node)actionEvent.getSource()).getScene().getWindow()).close();
     }
 
     public void setDishesInCart(List<OrderPosition> dishesInCart) {
         this.dishesInCart = dishesInCart;
-    }
-
-    public ModalStatus getStatus() {
-        return status;
     }
 }

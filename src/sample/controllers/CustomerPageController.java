@@ -12,15 +12,18 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+import sample.AlertService;
+import sample.DAOFactory;
+import sample.ModalService;
 import sample.dao.DishDAO;
 import sample.dto.Dish;
 import sample.dto.OrderPosition;
-import sample.dto.UserSession;
+import sample.dto.UserSessionSingleton;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -40,17 +43,24 @@ public class CustomerPageController implements Initializable {
 
     private final List<OrderPosition> dishesInCart = new ArrayList<>();
 
+    DishDAO dishDAO;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        menu_btn.setText(UserSession.currentSession().getUser().getLastname() + ", " + UserSession.currentSession().getUser().getFirstName());
-        synchronizeDishlist();
+        dishDAO = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
+
+        menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+        try {
+            synchronizeDishlist();
+        } catch (SQLException throwables) {
+            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
+        }
     }
 
     /**
      * fetches and displays all dishes from database in GUI
      */
-    public void synchronizeDishlist() {
-        DishDAO dishDAO = new DishDAO();
+    public void synchronizeDishlist() throws SQLException {
         List<Dish> dishes = dishDAO.getAll();
         boolean bcolor = false;
 
@@ -171,111 +181,62 @@ public class CustomerPageController implements Initializable {
      * opens ordermodal and handles responds after modal closure through its status
      *
      * @param actionEvent ae
+     * @throws IOException when scene not found
      */
-    public void openOrderModal(ActionEvent actionEvent) {
+    public void openOrderModal(ActionEvent actionEvent) throws IOException {
         if (dishesInCart.isEmpty()) {
             error_msg.setVisible(true);
             return;
         }
         error_msg.setVisible(false);
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/ordermodal.fxml"));
-            Parent root = loader.load();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/order_modal.fxml"));
+        Parent root = loader.load();
 
-            OrderModalController controller = loader.getController();
-            controller.setDishesInCart(dishesInCart);
-            controller.displayDishes();
+        OrderModalController controller = loader.getController();
+        controller.setDishesInCart(dishesInCart);
+        controller.displayDishes();
 
-            Stage main = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-            Stage modal = new Stage();
-            modal.setScene(new Scene(root));
-            modal.initOwner(main);
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.showAndWait();
+        ModalController.ModalStatus result = ModalService.openModal((Stage) ((Node) actionEvent.getSource()).getScene().getWindow(), loader, root);
 
-            if (controller.getStatus() == ModalStatus.SUCCESS) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Erfolgreich");
-                alert.setContentText("Ihre Bestellung wurde erfolgreich aufgegeben");
-                alert.getButtonTypes().setAll(ButtonType.OK);
-                alert.show();
-                dishesInCart.clear();
-                synchronizeCart();
-            } else if (controller.getStatus() == ModalStatus.FAILURE) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Fehler");
-                alert.setContentText("Ein Fehler ist aufgetreten, Ihre Bestellung konnte nicht aufgegeben werden.");
-                alert.getButtonTypes().setAll(ButtonType.OK);
-                alert.show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Fehler");
-            alert.setContentText("Ein Fehler ist aufgetreten, bitte wenden Sie sich an den nicht vorhandenen Support0.");
-            alert.getButtonTypes().setAll(ButtonType.OK);
-            alert.show();
-        }
-
+        if (result == ModalController.ModalStatus.SUCCESS) {
+            AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Ihre Bestellung wurde erfolgreich aufgegeben", ButtonType.OK);
+            dishesInCart.clear();
+            synchronizeCart();
+        } else if (result == ModalController.ModalStatus.FAILURE)
+            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Ihre Bestellung konnte nicht aufgegeben werden.", ButtonType.OK);
     }
 
-    public void showOrderHistory() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/order_history.fxml"));
-            Parent root = loader.load();
-
-            Stage main = (Stage) dishlist.getScene().getWindow();
-            Stage modal = new Stage();
-            modal.setScene(new Scene(root));
-            modal.initOwner(main);
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    /**
+     * opens OrderHistoryModal
+     * @throws IOException when scene not found
+     */
+    public void openOrderHistoryModal() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/order_history_modal.fxml"));
+        ModalService.openModal((Stage) dishlist.getScene().getWindow(), loader, loader.load());
     }
 
-    public void openAccountEditModal() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/customer_profile_edit_modal.fxml"));
-            Parent root = loader.load();
+    /**
+     * opens AccountEditModal
+     * @throws IOException when scene not found
+     */
+    public void openAccountEditModal() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/customer/customer_profile_edit_modal.fxml"));
+        ModalController.ModalStatus result = ModalService.openModal((Stage) dishlist.getScene().getWindow(), loader, loader.load());
 
-            ProfileEditModalController controller = loader.getController();
-
-            Stage main = (Stage) dishlist.getScene().getWindow();
-            Stage modal = new Stage();
-            modal.setScene(new Scene(root));
-            modal.initOwner(main);
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.showAndWait();
-
-            if (controller.getStatus() == ModalStatus.SUCCESS) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Erfolgreich");
-                alert.setContentText("Änderungen wurden gespeichert");
-                alert.getButtonTypes().setAll(ButtonType.OK);
-                alert.show();
-                menu_btn.setText(UserSession.currentSession().getUser().getLastname() + ", " + UserSession.currentSession().getUser().getFirstName());
-            } else if (controller.getStatus() == ModalStatus.FAILURE) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Fehler");
-                alert.setContentText("Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.");
-                alert.getButtonTypes().setAll(ButtonType.OK);
-                alert.show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Fehler");
-            alert.setContentText("Ein Fehler ist aufgetreten, bitte wenden Sie sich an den nicht vorhandenen Support.");
-            alert.getButtonTypes().setAll(ButtonType.OK);
-            alert.show();
-        }
+        if (result == ModalController.ModalStatus.SUCCESS) {
+            AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Änderungen wurden gespeichert", ButtonType.OK);
+            menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+        } else if (result == ModalController.ModalStatus.FAILURE)
+            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.", ButtonType.OK);
     }
 
+    /**
+     * logs user out, sets UserSession to null and switches scene to Login-Scene
+     * @throws IOException when login scene not found
+     */
     public void logout() throws IOException {
         Stage stage = (Stage) dishlist.getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/login.fxml")))));
-        UserSession.currentSession().cleanUserSession();
+        UserSessionSingleton.currentSession().cleanUserSession();
     }
 }

@@ -26,10 +26,13 @@
       <fx:define>
       <ToggleGroup fx:id="gender_group" />
    </fx:define>
-      <RadioButton mnemonicParsing="false" toggleGroup="$gender_group" selected="true" text="Herr" userData="m">
+      <RadioButton mnemonicParsing="false" selected="true" text="Herr" userData="m">
          <HBox.margin>
             <Insets right="100.0" />
          </HBox.margin>
+         <toggleGroup>
+            <ToggleGroup fx:id="gender_group" />
+         </toggleGroup>
       </RadioButton>
       <RadioButton mnemonicParsing="false" text="Frau" toggleGroup="$gender_group" userData="f">
          <HBox.margin>
@@ -105,7 +108,12 @@
    <Label fx:id="error_msg" text="Bitte alle Felder ausfüllen und auf die Korrektheit der E-Mail-Adresse achten" textFill="RED" visible="false" />
    <Button mnemonicParsing="false" onAction="#register" text="Kostenlos registrieren">
       <VBox.margin>
-         <Insets top="20.0" />
+         <Insets bottom="10.0" top="10.0" />
+      </VBox.margin>
+   </Button>
+   <Button mnemonicParsing="false" onAction="#returnToLoginPage" text="Zurück zum Login">
+      <VBox.margin>
+         <Insets bottom="10.0" />
       </VBox.margin>
    </Button>
 </VBox>

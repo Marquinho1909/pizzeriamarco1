@@ -1,17 +1,17 @@
 package sample.dto;
 
 /**
- * Singleton-Muster
+ * Singleton Pattern for handling user session
  */
-public class UserSession {
-    private static UserSession currentSession = null;
+public class UserSessionSingleton {
+    private static UserSessionSingleton currentSession = null;
     private User user;
-    private UserSession () {
+    private UserSessionSingleton() {
     }
 
-    public static UserSession currentSession() {
+    public static UserSessionSingleton currentSession() {
         if (currentSession == null) {
-            currentSession = new UserSession();
+            currentSession = new UserSessionSingleton();
         }
         return currentSession;
     }
