@@ -12,12 +12,16 @@ import java.util.List;
  * DAO for Order
  */
 public class OrderDAO extends DAO {
-    UserDAO userDAO = new UserDAO();
-    OrderPositionDAO orderpositionDAO = new OrderPositionDAO();
+    UserDAO userDAO;
+    OrderPositionDAO orderpositionDAO;
 
     Connection connection;
 
-    public OrderDAO() { connection = new JDBCClient().connection; }
+    public OrderDAO(UserDAO userDAO, OrderPositionDAO orderPositionDAO) {
+        this.userDAO = userDAO;
+        this.orderpositionDAO = orderPositionDAO;
+        connection = new JDBCClient().connection;
+    }
 
     /**
      * returns list of all orders in database

@@ -16,11 +16,11 @@ import java.util.Optional;
  * DAO of OrderPosition
  */
 public class OrderPositionDAO extends DAO {
-    CategoryDAO categoryDAO = new CategoryDAO();
-
+    CategoryDAO categoryDAO;
     Connection connection;
 
-    public OrderPositionDAO() {
+    public OrderPositionDAO(CategoryDAO categoryDAO) {
+        this.categoryDAO = categoryDAO;
         connection = new JDBCClient().connection;
     }
 

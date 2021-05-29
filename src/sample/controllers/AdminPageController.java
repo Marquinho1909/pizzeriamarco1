@@ -9,7 +9,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.TableView;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.AlertService;
 import sample.DAOFactory;
@@ -46,7 +45,7 @@ public class AdminPageController implements Initializable {
         orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO("Order");
         dishDAO = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
 
-        menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+        setMenuBtnNameToCurrent();
         try {
             updateCustomerTable();
             updateOrderTable();
@@ -124,21 +123,31 @@ public class AdminPageController implements Initializable {
         }
     }
 
+    /**
+     * Opens DishCreationModal and updates dish table after closing
+     * @throws IOException when scene not found
+     * @throws SQLException sql exception
+     */
     public void openDishCreationModal() throws IOException, SQLException {
-        Stage modal = new Stage();
-        modal.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/admin/dish_creation_modal.fxml")))));
-        modal.initOwner(table_dish.getScene().getWindow());
-        modal.initModality(Modality.APPLICATION_MODAL);
-        modal.showAndWait();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/admin/dish_creation_modal.fxml"));
+        ModalService.openModal((Stage) table_dish.getScene().getWindow(), loader, loader.load());
         updateDishTable();
     }
 
+    /**
+     * logs user out, set UserSession to null and redirects to login page
+     * @throws IOException when scene not found
+     */
     public void logout() throws IOException {
         Stage stage = (Stage) table_dish.getScene().getWindow();
         stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../resources/views/login.fxml")))));
         UserSessionSingleton.currentSession().cleanUserSession();
     }
 
+    /**
+     * opens AccountEditModal
+     * @throws IOException when scene not found
+     */
     public void openAccountEditModal() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/views/admin/admin_profile_edit_modal.fxml"));
 
@@ -146,11 +155,15 @@ public class AdminPageController implements Initializable {
 
         if (result == ModalController.ModalStatus.SUCCESS) {
             AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Änderungen wurden gespeichert", ButtonType.OK);
-            menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+            setMenuBtnNameToCurrent();
         } else if (result == ModalController.ModalStatus.FAILURE)
             AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.", ButtonType.OK);
     }
 
+    /**
+     * deletes selected dish from dish table
+     * @throws SQLException sql exception
+     */
     public void deleteDish() throws SQLException {
         TableDish td = table_dish.getSelectionModel().getSelectedItem();
 
@@ -162,6 +175,13 @@ public class AdminPageController implements Initializable {
             dishDAO.delete(td.getId());
             updateDishTable();
         }
+    }
+
+    /**
+     * sets displayed name in menu button to currently logged in user
+     */
+    private void setMenuBtnNameToCurrent() {
+        menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
     }
 
     /**

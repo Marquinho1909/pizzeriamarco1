@@ -4,11 +4,11 @@ import sample.dao.*;
 
 public class DAOFactory {
     CategoryDAO categoryDAO = new CategoryDAO();
+    OrderPositionDAO orderPositionDAO = new OrderPositionDAO(categoryDAO);
     CouponDAO couponDAO = new CouponDAO();
-    DishDAO dishDAO = new DishDAO();
-    OrderDAO orderDAO = new OrderDAO();
-    OrderPositionDAO orderPositionDAO = new OrderPositionDAO();
-    UserDAO userDAO = new UserDAO();
+    UserDAO userDAO = new UserDAO(couponDAO);
+    DishDAO dishDAO = new DishDAO(categoryDAO);
+    OrderDAO orderDAO = new OrderDAO(userDAO, orderPositionDAO);
 
     private static final DAOFactory instance = new DAOFactory();
 

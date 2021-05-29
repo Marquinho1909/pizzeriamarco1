@@ -159,7 +159,7 @@ public class JDBCClient {
     }
 
     private void createDummyCategories() throws SQLException {
-        CategoryDAO dao = new CategoryDAO();
+        CategoryDAO dao = (CategoryDAO) DAOFactory.getInstance().getDAO("Category");
         dao.save(new Category("Pizza"));
         dao.save(new Category("Pasta"));
         dao.save(new Category("Salat"));
@@ -168,7 +168,7 @@ public class JDBCClient {
     }
 
     public void createDummyUsers() throws SQLException {
-        UserDAO dao = new UserDAO();
+        UserDAO dao = (UserDAO) DAOFactory.getInstance().getDAO("User");
         dao.save(new Customer("Debby", "Dummy", new Customer.Address("Dummy Street", "13a", 11111), 'f', "user1@dummy.com", "topsecret"));
         dao.save(new Customer("Max", "Mustermann", new Customer.Address("Dummy Street", "13b", 11111), 'm', "user2@dummy.com", "topsecret"));
         dao.save(new Admin("Hannah", "Tönjes", 'f', "admin2@dummy.com", "topsecret"));
@@ -177,7 +177,7 @@ public class JDBCClient {
 
     public void createDummyDishes() throws SQLException {
         logger.info("CREATING DUMMY DISHES");
-        DishDAO dishdao = new DishDAO();
+        DishDAO dishdao = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
         Dish[] dishes = {
                 new Dish("Pizza Hawaii", List.of(new Category("Pizza")), 6.30 ),
                 new Dish("Pizza Tuna", List.of(new Category("Pizza")),7.40),

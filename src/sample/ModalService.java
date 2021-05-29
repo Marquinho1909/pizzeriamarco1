@@ -7,7 +7,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.controllers.ModalController;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 /**

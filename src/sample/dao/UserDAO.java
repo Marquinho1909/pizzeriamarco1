@@ -15,11 +15,11 @@ import java.util.Optional;
  * DAO for User (Customer and Admin)
  */
 public class UserDAO extends DAO {
-    CouponDAO couponDAO = new CouponDAO();
-
+    CouponDAO couponDAO;
     Connection connection;
 
-    public UserDAO() {
+    public UserDAO(CouponDAO couponDAO) {
+        this.couponDAO = couponDAO;
         connection = new JDBCClient().connection;
     }
 
@@ -60,14 +60,9 @@ public class UserDAO extends DAO {
      * @throws SQLException sql exception
      */
     public Optional<Coupon> getCustomerCoupon(Customer customer) throws SQLException {
-        PreparedStatement prepA = connection.prepareStatement("SELECT id FROM Address WHERE street=? AND housenumber=? AND zipcode=?;");
-        prepA.setString(1, customer.getAddress().getStreet());
-        prepA.setString(2, customer.getAddress().getHouseNumber());
-        prepA.setInt(3, customer.getAddress().getZipCode());
-        ResultSet rs = prepA.executeQuery();
-        if (rs.first())
-            return couponDAO.getCouponByAddressId(rs.getInt(1));
-        else throw new SQLException("ADDRESS OF CUSTOMER NOT FOUND");
+        int id = getAddressIdOfAddress(customer.getAddress());
+        if (id == 0) throw new SQLException("ADDRESS OF CUSTOMER NOT FOUND");
+        return couponDAO.getCouponByAddressId(id);
     }
 
     /**
@@ -82,28 +77,20 @@ public class UserDAO extends DAO {
         if (user.getClass() == Customer.class) {
             Customer customer = (Customer) user;
             // Searches for address in case it already exists
-            PreparedStatement prepA = connection.prepareStatement("SELECT id FROM Address WHERE street=? AND housenumber=? AND zipcode=?;");
-            prepA.setString(1, customer.getAddress().getStreet());
-            prepA.setString(2, customer.getAddress().getHouseNumber());
-            prepA.setInt(3, customer.getAddress().getZipCode());
-            ResultSet rs = prepA.executeQuery();
-            if (rs.first()) {
-                // When address already exists, no coupon created
-                aId = rs.getInt(1);
-            } else {
+            aId = getAddressIdOfAddress(customer.getAddress());
+            if (aId == 0) {
                 // When address is new, address and coupon are created
-                prepA = connection.prepareStatement("INSERT INTO Address (street, housenumber, zipcode) VALUES (?,?,?);", Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement prepA = connection.prepareStatement("INSERT INTO Address (street, housenumber, zipcode) VALUES (?,?,?);", Statement.RETURN_GENERATED_KEYS);
                 prepA.setString(1, customer.getAddress().getStreet());
                 prepA.setString(2, customer.getAddress().getHouseNumber());
                 prepA.setInt(3, customer.getAddress().getZipCode());
                 prepA.execute();
-                rs = prepA.getGeneratedKeys();
+                ResultSet rs = prepA.getGeneratedKeys();
 
                 if (rs.first()) {
                     aId = rs.getInt(1);
                     couponDAO.saveByAddressId(new Coupon(0.1), aId);
-                } else
-                    throw new SQLException("GENERATED KEY NOT FOUND");
+                } else throw new SQLException("GENERATED KEY NOT FOUND");
             }
         }
 
@@ -120,15 +107,13 @@ public class UserDAO extends DAO {
         prep.setString(4, user.getEmail());
         prep.setString(5, user.getPassword());
         prep.setString(6, user.getClass() == Admin.class ? "Admin" : "Customer");
-        if (aId != 0)
-            prep.setInt(7, aId);
+
+        if (aId != 0) prep.setInt(7, aId);
 
         prep.execute();
         ResultSet rs = prep.getGeneratedKeys();
-        if (rs.next())
-            return rs.getInt(1);
-        else
-            throw new SQLException();
+        if (rs.next()) return rs.getInt(1);
+        else throw new SQLException();
     }
 
     /**
@@ -165,7 +150,26 @@ public class UserDAO extends DAO {
     }
 
     /**
+     * returns either id of address or 0 if no address was found
+     *
+     * @param address that is being looked for
+     * @return address id of parameter
+     * @throws SQLException sql exception
+     */
+    public int getAddressIdOfAddress(Customer.Address address) throws SQLException {
+        PreparedStatement prepA = connection.prepareStatement("SELECT id FROM Address WHERE street=? AND housenumber=? AND zipcode=?;");
+        prepA.setString(1, address.getStreet());
+        prepA.setString(2, address.getHouseNumber());
+        prepA.setInt(3, address.getZipCode());
+        ResultSet rs = prepA.executeQuery();
+        if (rs.first())
+            return rs.getInt(1);
+        else return 0;
+    }
+
+    /**
      * converts resultset from sql execution to either customer or admin, depending on its type
+     *
      * @param user to be converted
      * @return converted user, either of type Admin or Customer
      * @throws SQLException sql exception
@@ -179,6 +183,7 @@ public class UserDAO extends DAO {
 
     /**
      * converts ResultSet known to be a customer to a Customer
+     *
      * @param customer resultSet to be converted
      * @return converted Customer
      * @throws SQLException sql exception
@@ -210,13 +215,13 @@ public class UserDAO extends DAO {
     }
 
     /**
-     *
-     * @param email
-     * @param password
-     * @return
-     * @throws SQLException
+     * tries to find user with login credentials
+     * @param email of user
+     * @param password of user
+     * @return User if found
+     * @throws SQLException sql exception
      */
-    public User getUserByEmailAndPassword(String email, String password) throws SQLException {
+    public Optional<User> getUserByEmailAndPassword(String email, String password) throws SQLException {
         User user = null;
         PreparedStatement prep = connection.prepareStatement("SELECT * FROM User u LEFT JOIN Address a ON u.addressid = a.id WHERE email=? AND password=?;");
         prep.setString(1, email);
@@ -229,9 +234,14 @@ public class UserDAO extends DAO {
             else
                 user = convertToCostumer(rs);
         }
-        return user;
+        return Optional.of(user);
     }
 
+    /**
+     * makes customer to admin
+     * @param id of customer
+     * @throws SQLException sql exception
+     */
     public void makeCustomerAdmin(int id) throws SQLException {
         connection.createStatement().executeUpdate("UPDATE User SET usertype='Admin' WHERE id=" + id);
     }

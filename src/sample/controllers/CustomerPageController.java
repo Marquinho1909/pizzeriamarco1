@@ -52,7 +52,7 @@ public class CustomerPageController implements Initializable {
         menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
         try {
             synchronizeDishlist();
-        } catch (SQLException throwables) {
+        } catch (SQLException e) {
             AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
         }
     }

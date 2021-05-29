@@ -69,7 +69,7 @@ public class RegisterController implements Initializable {
                     email_input.getText(),
                     password_input.getText()
             ));
-            UserSessionSingleton.currentSession().setUser(userDAO.getUserByEmailAndPassword(email_input.getText(), password_input.getText()));
+            UserSessionSingleton.currentSession().setUser(userDAO.getUserByEmailAndPassword(email_input.getText(), password_input.getText()).orElseThrow());
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
 
             try {

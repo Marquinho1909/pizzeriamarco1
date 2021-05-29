@@ -7,36 +7,17 @@ import sample.dto.Dish;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * DAO for Dish
  */
 public class DishDAO extends DAO {
-    CategoryDAO categoryDAO = new CategoryDAO();
+    CategoryDAO categoryDAO;
     Connection connection;
 
-    public DishDAO() {
+    public DishDAO(CategoryDAO categoryDAO) {
+        this.categoryDAO = categoryDAO;
         connection = new JDBCClient().connection;
-    }
-
-    /**
-     * returns dish by its id
-     * @param id of dish
-     * @return dish
-     * @throws SQLException sql exception
-     */
-    public Optional<Dish> get(int id) throws SQLException {
-            ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Dish WHERE id=" + id + ";");
-            if (result.first()) {
-                return Optional.of(new Dish(
-                        result.getInt("id"),
-                        result.getString("name"),
-                        categoryDAO.getAllByDishId(result.getInt("id")),
-                        result.getDouble("price")
-                ));
-            }
-        return Optional.empty();
     }
 
     /**
