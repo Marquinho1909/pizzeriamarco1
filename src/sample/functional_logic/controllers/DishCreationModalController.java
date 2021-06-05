@@ -1,6 +1,7 @@
 package sample.functional_logic.controllers;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -21,11 +22,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class DishCreationModalController extends ModalController implements Initializable {
-    public Spinner<Double> price_input;
-    public TextField name_input;
-    public Label error_msg;
-    public VBox categories_list;
-    public TextField category_input;
+    @FXML private Spinner<Double> price_input;
+    @FXML private TextField name_input;
+    @FXML private Label error_msg;
+    @FXML private VBox categories_list;
+    @FXML private TextField category_input;
     private List<Category> categories;
 
     CategoryDAO categoryDAO;

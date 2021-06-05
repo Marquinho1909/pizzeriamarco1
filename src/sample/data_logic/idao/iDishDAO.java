@@ -10,4 +10,5 @@ public interface iDishDAO {
     List<Dish> getAllActive() throws SQLException;
     int save(Dish dish) throws SQLException;
     void delete(int id) throws SQLException;
+    void setActivation(boolean active, int id) throws SQLException;
 }

@@ -12,23 +12,20 @@
 <VBox alignment="CENTER" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.functional_logic.controllers.OrderModalController">
    <Label text="Bestellbestätigung">
       <font>
-         <Font size="32.0" />
+         <Font size="30.0" />
       </font>
       <VBox.margin>
          <Insets bottom="10.0" left="100.0" right="100.0" top="10.0" />
       </VBox.margin>
    </Label>
    <ListView fx:id="overview" prefHeight="200.0">
-      <VBox.margin>
-         <Insets />
-      </VBox.margin>
    </ListView>
-   <CheckBox fx:id="coupon_check" mnemonicParsing="false" onAction="#displayDishes" text="Gutschein für 10% anwenden" visible="false">
+   <CheckBox fx:id="coupon_check" onAction="#displayDishes" text="Gutschein für 10% anwenden" visible="false">
       <VBox.margin>
          <Insets bottom="5.0" top="10.0" />
       </VBox.margin>
    </CheckBox>
-   <Label fx:id="orderText" text="Wollen Sie die Bestellung für 0€ aufgeben?">
+   <Label fx:id="orderText">
       <VBox.margin>
          <Insets left="40.0" right="40.0" top="5.0" />
       </VBox.margin>
@@ -37,12 +34,12 @@
       <VBox.margin>
          <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
       </VBox.margin>
-      <Button mnemonicParsing="false" onAction="#closeModal" text="Abbrechen">
+      <Button onAction="#closeModal" text="Abbrechen">
          <HBox.margin>
             <Insets right="10.0" />
          </HBox.margin>
       </Button>
-      <Button mnemonicParsing="false" onAction="#order" text="Bestellen">
+      <Button onAction="#order" text="Bestellen">
          <HBox.margin>
             <Insets left="10.0" />
          </HBox.margin>

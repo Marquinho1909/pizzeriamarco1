@@ -4,10 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import sample.data_logic.DAOFactory;
 import sample.data_logic.dao.CouponDAO;
@@ -24,6 +21,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class OrderModalController extends ModalController implements Initializable {
+    @FXML private Label orderText;
     @FXML private CheckBox coupon_check;
     @FXML private ListView<String> overview;
 
@@ -76,6 +74,8 @@ public class OrderModalController extends ModalController implements Initializab
         }
 
         overview.getItems().addAll("", "_______________________", "Total: " + CustomerPageController.transformPrice(total));
+
+        orderText.setText("Wollen Sie die Bestellung für " + CustomerPageController.transformPrice(total) + " aufgeben?");
     }
 
     /**
@@ -113,9 +113,8 @@ public class OrderModalController extends ModalController implements Initializab
             e.printStackTrace();
             setStatus(ModalStatus.FAILURE);
             AlertService.showError();
-            ((Stage) ((Node)actionEvent.getSource()).getScene().getWindow()).close();
         }
-
+        ((Stage) ((Node)actionEvent.getSource()).getScene().getWindow()).close();
     }
 
     public void setDishesInCart(List<OrderPosition> dishesInCart) {

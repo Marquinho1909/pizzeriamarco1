@@ -115,6 +115,13 @@ public class DishDAO extends DAO implements iDishDAO {
             connection.createStatement().execute("DELETE FROM Dish WHERE id=" + id + ";");
     }
 
+    /**
+     * sets active for dish
+     * @param active value that active will be set
+     * @param id of dish to set active
+     * @throws SQLException sql exception
+     */
+    @Override
     public void setActivation(boolean active, int id) throws SQLException {
         PreparedStatement prep = connection.prepareStatement("UPDATE Dish SET active = ? WHERE id=?;");
         prep.setBoolean(1, active);

@@ -17,29 +17,26 @@
          <Font name="System Bold" size="50.0" />
       </font>
    </Label>
-   <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="61.0" prefWidth="639.0" text="Registrierung">
+   <Label alignment="CENTER" contentDisplay="CENTER" text="Registrierung">
       <font>
          <Font size="30.0" />
       </font>
    </Label>
-   <HBox alignment="CENTER" prefHeight="31.0" prefWidth="640.0">
+   <HBox alignment="CENTER">
       <fx:define>
       <ToggleGroup fx:id="gender_group" />
    </fx:define>
-      <RadioButton mnemonicParsing="false" selected="true" text="Herr" userData="m">
-         <HBox.margin>
-            <Insets right="100.0" />
-         </HBox.margin>
-         <toggleGroup>
-            <ToggleGroup fx:id="gender_group" />
-         </toggleGroup>
-      </RadioButton>
-      <RadioButton mnemonicParsing="false" text="Frau" toggleGroup="$gender_group" userData="f">
+      <RadioButton selected="true" text="Herr" userData="m">
          <HBox.margin>
             <Insets right="100.0" />
          </HBox.margin>
       </RadioButton>
-      <RadioButton mnemonicParsing="false" text="Divers" toggleGroup="$gender_group" userData="d" />
+      <RadioButton text="Frau" toggleGroup="$gender_group" userData="f">
+         <HBox.margin>
+            <Insets right="100.0" />
+         </HBox.margin>
+      </RadioButton>
+      <RadioButton text="Divers" toggleGroup="$gender_group" userData="d" />
    </HBox>
    <HBox alignment="CENTER" prefHeight="40.0">
       <Label prefHeight="17.0" prefWidth="60.0" text="Vorname:">
@@ -106,12 +103,12 @@
       <PasswordField fx:id="password_input" prefHeight="25.0" prefWidth="150.0" />
    </HBox>
    <Label fx:id="error_msg" text="Bitte alle Felder ausfüllen und auf die Korrektheit der E-Mail-Adresse achten" textFill="RED" visible="false" />
-   <Button mnemonicParsing="false" onAction="#register" text="Kostenlos registrieren">
+   <Button onAction="#register" text="Kostenlos registrieren">
       <VBox.margin>
          <Insets bottom="10.0" top="10.0" />
       </VBox.margin>
    </Button>
-   <Button mnemonicParsing="false" onAction="#returnToLoginPage" text="Zurück zum Login">
+   <Button onAction="#returnToLoginPage" text="Zurück zum Login">
       <VBox.margin>
          <Insets bottom="10.0" />
       </VBox.margin>

@@ -12,12 +12,12 @@
 
 <VBox alignment="CENTER" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/15.0.1"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.functional_logic.controllers.LoginController">
-    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="102.0" text="Pizzeria Marco">
+    <Label alignment="CENTER" contentDisplay="CENTER" text="Pizzeria Marco">
         <font>
           <Font name="System Bold" size="50.0"/>
         </font>
     </Label>
-    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="48.0" prefWidth="640.0" text="Login">
+    <Label alignment="CENTER" contentDisplay="CENTER" text="Login">
         <font>
           <Font size="30.0"/>
         </font>
@@ -31,7 +31,7 @@
                 <Insets/>
             </opaqueInsets>
         </Label>
-        <TextField fx:id="email_input" prefHeight="25.0" prefWidth="152.0">
+        <TextField fx:id="email_input">
             <HBox.margin>
                 <Insets right="30.0"/>
             </HBox.margin>
@@ -46,8 +46,7 @@
                 <Insets/>
             </HBox.margin>
         </PasswordField>
-        <Button fx:id="login_btn" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false"
-                onAction="#login" prefHeight="25.0" prefWidth="53.0" text="Login">
+        <Button alignment="CENTER" contentDisplay="CENTER" onAction="#login" text="Login">
             <HBox.margin>
                 <Insets left="30.0"/>
             </HBox.margin>
@@ -68,5 +67,5 @@
           <Insets bottom="10.0"/>
         </VBox.margin>
     </Label>
-    <Button fx:id="register_btn" mnemonicParsing="false" onAction="#changeSceneToRegister" text="Jetzt registrieren"/>
+    <Button onAction="#changeSceneToRegister" text="Jetzt registrieren"/>
 </VBox>

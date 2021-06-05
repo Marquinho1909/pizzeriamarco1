@@ -2,6 +2,7 @@ package sample.functional_logic.controllers;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableView;
 import sample.data_logic.DAOFactory;
@@ -18,14 +19,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class OrderHistoryModalController extends ModalController implements Initializable {
-    public TableView<TableOrder> table_order;
+    @FXML private TableView<TableOrder> table_order;
 
     OrderDAO orderDAO;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO("Order");
-
         updateDishTable();
     }
 

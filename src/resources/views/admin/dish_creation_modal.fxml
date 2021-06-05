@@ -28,9 +28,7 @@
                </HBox.margin>
             </Label>
             <TextField fx:id="name_input" HBox.hgrow="ALWAYS">
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin>
+
             </TextField>
          </HBox>
          <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
@@ -64,8 +62,7 @@
                <Insets top="10.0"/>
             </VBox.margin>
             <TextField fx:id="category_input"/>
-            <Button alignment="CENTER" minWidth="-Infinity" onAction="#createCategory" prefWidth="120.0"
-                    text="Kategorie erstellen">
+            <Button alignment="CENTER" onAction="#createCategory" prefWidth="120.0" text="Kategorie erstellen">
                <HBox.margin>
                   <Insets left="5.0"/>
                </HBox.margin>
@@ -89,17 +86,18 @@
    <Label fx:id="error_msg" text="Bitte alle Felder ausfüllen!" textFill="RED">
       <VBox.margin>
          <Insets bottom="10.0" top="10.0" />
-      </VBox.margin></Label>
+      </VBox.margin>
+   </Label>
    <HBox alignment="CENTER">
       <VBox.margin>
          <Insets bottom="20.0" />
       </VBox.margin>
-      <Button mnemonicParsing="false" onAction="#save" text="Speichern">
+      <Button onAction="#save" text="Speichern">
          <HBox.margin>
             <Insets right="10.0" />
          </HBox.margin>
       </Button>
-      <Button mnemonicParsing="false" onAction="#cancel" text="Abbruch">
+      <Button onAction="#cancel" text="Abbruch">
          <HBox.margin>
             <Insets left="10.0" />
          </HBox.margin>

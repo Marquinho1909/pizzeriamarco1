@@ -18,11 +18,12 @@ public class Customer extends User {
         this.coupon = coupon;
     }
 
-
     public Coupon getCoupon() { return coupon; }
     public Address getAddress() {
         return address;
     }
+    public void setAddress(Address address) { this.address = address; }
+    public void setCoupon(Coupon coupon) { this.coupon = coupon; }
 
     @Override
     public String toString() {
@@ -57,6 +58,9 @@ public class Customer extends User {
         public int getZipCode() {
             return zipCode;
         }
+        public void setStreet(String street) { this.street = street; }
+        public void setHouseNumber(String houseNumber) { this.houseNumber = houseNumber; }
+        public void setZipCode(int zipCode) { this.zipCode = zipCode; }
 
         @Override
         public String toString() {
