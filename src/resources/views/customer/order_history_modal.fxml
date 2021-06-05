@@ -12,7 +12,7 @@
 
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <VBox alignment="CENTER" prefHeight="816.0" prefWidth="1187.0" xmlns="http://javafx.com/javafx/15.0.1"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.OrderHistoryModalController">
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.functional_logic.controllers.OrderHistoryModalController">
    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="102.0" text="Pizzeria Marco">
       <font>
          <Font name="System Bold" size="50.0"/>

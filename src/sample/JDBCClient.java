@@ -1,12 +1,13 @@
 package sample;
 
-import sample.dao.CategoryDAO;
-import sample.dao.DishDAO;
-import sample.dao.UserDAO;
-import sample.dto.Admin;
-import sample.dto.Category;
-import sample.dto.Customer;
-import sample.dto.Dish;
+import sample.data_logic.dao.CategoryDAO;
+import sample.data_logic.dao.DishDAO;
+import sample.data_logic.dao.UserDAO;
+import sample.data_logic.DAOFactory;
+import sample.data_logic.dto.Admin;
+import sample.data_logic.dto.Category;
+import sample.data_logic.dto.Customer;
+import sample.data_logic.dto.Dish;
 
 import java.sql.*;
 import java.util.List;
@@ -72,7 +73,8 @@ public class JDBCClient {
                         "CREATE TABLE Dish(" +
                                 "id INTEGER AUTO_INCREMENT PRIMARY KEY," +
                                 "name VARCHAR(50)," +
-                                "price DECIMAL(4,2));"
+                                "price DECIMAL(4,2)," +
+                                "active BOOLEAN);"
                 );
             }
 
@@ -179,11 +181,11 @@ public class JDBCClient {
         logger.info("CREATING DUMMY DISHES");
         DishDAO dishdao = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
         Dish[] dishes = {
-                new Dish("Pizza Hawaii", List.of(new Category("Pizza")), 6.30 ),
-                new Dish("Pizza Tuna", List.of(new Category("Pizza")),7.40),
-                new Dish("Pizza Margherita", List.of(new Category("Pizza"), new Category("Vegetarisch")),4.0),
-                new Dish("Lasagne á la Marco", List.of(new Category("Lasagne")),20),
-                new Dish("Caesar Salad", List.of(new Category("Salat")),20)};
+                new Dish("Pizza Hawaii", List.of(new Category("Pizza")), 6.30 , true),
+                new Dish("Pizza Tuna", List.of(new Category("Pizza")),7.40, true),
+                new Dish("Pizza Margherita", List.of(new Category("Pizza"), new Category("Vegetarisch")),4.0, true),
+                new Dish("Lasagne á la Marco", List.of(new Category("Lasagne")),20, true),
+                new Dish("Caesar Salad", List.of(new Category("Salat")),20, true)};
 
         for (Dish d : dishes)
             dishdao.save(d);
