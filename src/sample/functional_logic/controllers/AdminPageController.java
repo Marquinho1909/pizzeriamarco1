@@ -11,6 +11,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 import sample.data_logic.DAOFactory;
+import sample.data_logic.UserSessionSingleton;
 import sample.data_logic.dao.DishDAO;
 import sample.data_logic.dao.OrderDAO;
 import sample.data_logic.dao.UserDAO;

@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import sample.data_logic.DAOFactory;
+import sample.data_logic.UserSessionSingleton;
 import sample.data_logic.dao.CouponDAO;
 import sample.data_logic.dao.OrderDAO;
 import sample.data_logic.dao.UserDAO;

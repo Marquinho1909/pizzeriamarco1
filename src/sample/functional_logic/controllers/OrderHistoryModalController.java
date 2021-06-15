@@ -9,7 +9,7 @@ import sample.data_logic.DAOFactory;
 import sample.data_logic.dao.OrderDAO;
 import sample.data_logic.dto.Order;
 import sample.data_logic.dto.OrderPosition;
-import sample.data_logic.dto.UserSessionSingleton;
+import sample.data_logic.UserSessionSingleton;
 import sample.functional_logic.AlertService;
 
 import java.net.URL;

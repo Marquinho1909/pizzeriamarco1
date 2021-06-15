@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import sample.data_logic.DAOFactory;
 import sample.data_logic.dao.UserDAO;
 import sample.data_logic.dto.Customer;
-import sample.data_logic.dto.UserSessionSingleton;
+import sample.data_logic.UserSessionSingleton;
 import sample.functional_logic.AlertService;
 
 import java.io.IOException;

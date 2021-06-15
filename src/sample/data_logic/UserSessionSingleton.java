@@ -1,4 +1,6 @@
-package sample.data_logic.dto;
+package sample.data_logic;
+
+import sample.data_logic.dto.User;
 
 /**
  * Singleton Pattern for handling user session

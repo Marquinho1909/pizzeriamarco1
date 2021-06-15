@@ -15,7 +15,7 @@ import sample.data_logic.dao.UserDAO;
 import sample.data_logic.dto.Admin;
 import sample.data_logic.dto.Customer;
 import sample.data_logic.dto.User;
-import sample.data_logic.dto.UserSessionSingleton;
+import sample.data_logic.UserSessionSingleton;
 import sample.functional_logic.AlertService;
 
 import java.io.IOException;

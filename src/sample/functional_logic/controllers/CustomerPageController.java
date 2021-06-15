@@ -20,7 +20,7 @@ import sample.data_logic.dao.DishDAO;
 import sample.data_logic.dto.Category;
 import sample.data_logic.dto.Dish;
 import sample.data_logic.dto.OrderPosition;
-import sample.data_logic.dto.UserSessionSingleton;
+import sample.data_logic.UserSessionSingleton;
 import sample.functional_logic.AlertService;
 import sample.functional_logic.ModalService;
 
