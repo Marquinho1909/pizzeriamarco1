@@ -164,8 +164,8 @@ public class JDBCClient {
         CategoryDAO dao = (CategoryDAO) DAOFactory.getInstance().getDAO("Category");
         dao.save(new Category("Pizza"));
         dao.save(new Category("Pasta"));
-        dao.save(new Category("Salat"));
         dao.save(new Category("Lasagne"));
+        dao.save(new Category("Salat"));
         dao.save(new Category("Vegetarisch"));
     }
 
@@ -184,8 +184,20 @@ public class JDBCClient {
                 new Dish("Pizza Hawaii", List.of(new Category("Pizza")), 6.30 , true),
                 new Dish("Pizza Tuna", List.of(new Category("Pizza")),7.40, true),
                 new Dish("Pizza Margherita", List.of(new Category("Pizza"), new Category("Vegetarisch")),4.0, true),
+                new Dish("Pizza Cipolla", List.of(new Category("Pizza"), new Category("Vegetarisch")),4.0, true),
+                new Dish("Pizza Napoli", List.of(new Category("Pizza")),4.0, true),
+                new Dish("Pizza Salami", List.of(new Category("Pizza")),4.0, true),
+                new Dish("Pizza Funghi", List.of(new Category("Pizza"), new Category("Vegetarisch")),4.0, true),
+                new Dish("Spaghetti Napoli", List.of(new Category("Pasta"), new Category("Vegetarisch")),5.0, true),
+                new Dish("Spaghetti Carbonara", List.of(new Category("Pasta")),6.0, true),
+                new Dish("Spaghetti Rinder-Bolognese", List.of(new Category("Pasta")),6.0, true),
+                new Dish("Spaghetti al Tonno", List.of(new Category("Pasta")),7.0, true),
                 new Dish("Lasagne á la Marco", List.of(new Category("Lasagne")),20, true),
-                new Dish("Caesar Salad", List.of(new Category("Salat")),20, true)};
+                new Dish("Lasagne á la Marco", List.of(new Category("Lasagne")),20, true),
+                new Dish("Caesar Salad", List.of(new Category("Salat")),7, true),
+                new Dish("Insalata Tonno", List.of(new Category("Salat")),7, true),
+                new Dish("Gemischter Salat", List.of(new Category("Salat")),3, true),
+                new Dish("Insalata Caprese", List.of(new Category("Salat")),6, true)};
 
         for (Dish d : dishes)
             dishdao.save(d);

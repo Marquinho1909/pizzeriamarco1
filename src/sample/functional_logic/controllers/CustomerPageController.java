@@ -42,7 +42,8 @@ public class CustomerPageController implements Initializable {
     @FXML private Menu menu_btn;
 
     private final List<OrderPosition> dishesInCart = new ArrayList<>();
-    private List<Dish> dishes = new ArrayList<>();
+    private List<Dish> dishes;
+    private List<Category> categories;
 
     DishDAO dishDAO;
     CategoryDAO categoryDAO;
@@ -56,80 +57,91 @@ public class CustomerPageController implements Initializable {
 
         try {
             dishes = dishDAO.getAllActive();
-            synchronizeCategoryCB();
-            synchronizeDishlist();
+            categories = categoryDAO.getAll();
+            displayCategories();
+            displayDishes();
         } catch (SQLException e) {
             AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
         }
     }
 
-    public void synchronizeCategoryCB() {
+    public void displayCategories() {
         categories_cb.getItems().clear();
         categories_cb.getItems().add(new Category(0, "Alle anzeigen"));
         categories_cb.setValue(categories_cb.getItems().get(0));
-        List<Category> categories;
-        try {
-            categories = categoryDAO.getAll();
-            categories_cb.setConverter(new StringConverter<>() {
+
+        categories_cb.setConverter(new StringConverter<>() {
                 @Override
                 public String toString(Category category) {
                     return category.getName();
                 }
-
                 @Override
                 public Category fromString(String s) {
                     return new Category(s);
                 }
-            });
+        });
 
-            categories_cb.getItems().addAll(categories);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            AlertService.showError();
-        }
-
-
+        categories_cb.getItems().addAll(categories);
     }
 
     /**
      * fetches and displays all dishes from database in GUI
      */
-    public void synchronizeDishlist() {
+    public void displayDishes() {
         dishlist.getChildren().clear();
         List<Dish> filteredDishes = dishes;
-        if (categories_cb.getValue().getId() != 0)
+        List<Category> shownCategories;
+
+        if (categories_cb.getValue().getId() != 0) {
             filteredDishes = dishes.stream().filter(d -> d.getCategories().contains(categories_cb.getValue())).collect(Collectors.toList());
-
-        boolean bcolor = false;
-
-        for (Dish dish : filteredDishes) {
-            Label name = new Label(dish.getId() + ". " + dish.getName());
-            name.setPrefWidth(500);
-
-            Label price = new Label(transformPrice(dish.getPrice()));
-            price.setPrefWidth(70);
-            price.setContentDisplay(ContentDisplay.CENTER);
-            price.setAlignment(Pos.CENTER);
-
-            Spinner<Integer> sAmount = new Spinner<>();
-            sAmount.setPrefWidth(80);
-            sAmount.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20));
-            sAmount.getValueFactory().setValue(1);
-
-            Button btn = new Button("Hinzufügen");
-            btn.setPrefWidth(100);
-            btn.setOnAction((e) -> addToCart(dish, sAmount.getValue()));
-
-            HBox hBox = new HBox(name, price, sAmount, btn);
-            hBox.setAlignment(Pos.CENTER);
-            hBox.setPrefHeight(40);
-            hBox.setSpacing(10);
-
-            if (bcolor = !bcolor) hBox.setStyle("-fx-background-color: #e3e3e3;");
-            else hBox.setStyle("-fx-background-color: #eeeeee;");
-
-            dishlist.getChildren().add(hBox);
+            shownCategories = List.of(categories_cb.getValue());
+        } else {
+            shownCategories = categories;
         }
+
+
+        for (Category c: shownCategories) {
+            boolean bcolor = false;
+            Label caName = new Label(c.getName());
+            caName.setStyle("-fx-font-weight: bold;");
+            caName.setStyle("-fx-font-size: 25;");
+
+            HBox cahBox = new HBox(caName);
+            cahBox.setAlignment(Pos.CENTER);
+            cahBox.setPrefHeight(40);
+
+            dishlist.getChildren().add(cahBox);
+            List<Dish> caDishes = filteredDishes.stream().filter(d -> d.getCategories().contains(c)).collect(Collectors.toList());
+            for (Dish dish : caDishes) {
+                Label name = new Label(dish.getId() + ". " + dish.getName());
+                name.setPrefWidth(500);
+
+                Label price = new Label(transformPrice(dish.getPrice()));
+                price.setPrefWidth(70);
+                price.setContentDisplay(ContentDisplay.CENTER);
+                price.setAlignment(Pos.CENTER);
+
+                Spinner<Integer> sAmount = new Spinner<>();
+                sAmount.setPrefWidth(80);
+                sAmount.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20));
+                sAmount.getValueFactory().setValue(1);
+
+                Button btn = new Button("Hinzufügen");
+                btn.setPrefWidth(100);
+                btn.setOnAction((e) -> addToCart(dish, sAmount.getValue()));
+
+                HBox hBox = new HBox(name, price, sAmount, btn);
+                hBox.setAlignment(Pos.CENTER);
+                hBox.setPrefHeight(40);
+                hBox.setSpacing(10);
+
+                if (bcolor = !bcolor) hBox.setStyle("-fx-background-color: #e3e3e3;");
+                else hBox.setStyle("-fx-background-color: #eeeeee;");
+
+                dishlist.getChildren().add(hBox);
+            }
+        }
+
     }
 
     /**
@@ -142,18 +154,18 @@ public class CustomerPageController implements Initializable {
         for (OrderPosition o : dishesInCart) {
             if (o.getDish().getId() == dish.getId()) {
                 o.setAmount(Math.min(o.getAmount() + amount, 20));
-                synchronizeCart();
+                displayCart();
                 return;
             }
         }
         dishesInCart.add(new OrderPosition(dish, amount));
-        synchronizeCart();
+        displayCart();
     }
 
     /**
      * displays all orderpositions of list dishesInCart in GUI
      */
-    public void synchronizeCart() {
+    public void displayCart() {
         double total = 0;
         boolean bcolor = false;
 
@@ -178,7 +190,7 @@ public class CustomerPageController implements Initializable {
             btn.setPrefWidth(80);
             btn.setOnAction((e) -> {
                 dishesInCart.remove(o);
-                synchronizeCart();
+                displayCart();
             });
 
             HBox hbox = new HBox(name, price, btn);
@@ -219,7 +231,6 @@ public class CustomerPageController implements Initializable {
      * opens ordermodal and handles responds after modal closure through its status
      *
      * @param actionEvent ae
-     * @throws IOException when scene not found
      */
     public void openOrderModal(ActionEvent actionEvent) {
         if (dishesInCart.isEmpty()) {
@@ -240,7 +251,7 @@ public class CustomerPageController implements Initializable {
             if (result == ModalController.ModalStatus.SUCCESS) {
                 AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Ihre Bestellung wurde erfolgreich aufgegeben", ButtonType.OK);
                 dishesInCart.clear();
-                synchronizeCart();
+                displayCart();
             } else if (result == ModalController.ModalStatus.FAILURE)
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Ihre Bestellung konnte nicht aufgegeben werden.", ButtonType.OK);
         } catch (IOException e) {
@@ -291,6 +302,7 @@ public class CustomerPageController implements Initializable {
         try {
             stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../../resources/views/login.fxml")))));
             UserSessionSingleton.currentSession().cleanUserSession();
+            stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
             AlertService.showError();

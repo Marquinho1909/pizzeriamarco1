@@ -21,6 +21,7 @@ import sample.functional_logic.ModalService;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -42,15 +43,15 @@ public class AdminPageController implements Initializable {
         dishDAO = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
 
         setMenuBtnNameToCurrent();
-            updateCustomerTable();
-            updateOrderTable();
-            updateDishTable();
+            displayCustomers();
+            displayOrders();
+            displayDishes();
     }
 
     /**
      * gets all customers and displays them in table
      */
-    public void updateCustomerTable() {
+    public void displayCustomers() {
         table_user.getItems().clear();
 
         List<Customer> customers;
@@ -75,7 +76,7 @@ public class AdminPageController implements Initializable {
     /**
      * gets all orders and displays them in table
      */
-    public void updateOrderTable()  {
+    public void displayOrders()  {
         table_order.getItems().clear();
 
         List<Order> orders;
@@ -99,10 +100,10 @@ public class AdminPageController implements Initializable {
     /**
      * gets all dishes and displays them in table
      */
-    public void updateDishTable() {
+    public void displayDishes() {
         table_dish.getItems().clear();
 
-        List<Dish> dishes = null;
+        List<Dish> dishes = new ArrayList<>();
         try {
             dishes = dishDAO.getAll();
         } catch (SQLException e) {
@@ -133,7 +134,7 @@ public class AdminPageController implements Initializable {
         if (result.equals(ButtonType.YES)) {
             try {
                 userDAO.makeCustomerAdmin(tc.getId());
-                updateCustomerTable();
+                displayCustomers();
             } catch (SQLException e) {
                 e.printStackTrace();
                 AlertService.showError();
@@ -148,7 +149,7 @@ public class AdminPageController implements Initializable {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../../../resources/views/admin/dish_creation_modal.fxml"));
         try {
             ModalService.openModal((Stage) table_dish.getScene().getWindow(), loader, loader.load());
-            updateDishTable();
+            displayDishes();
         } catch (IOException e) {
             e.printStackTrace();
             AlertService.showError();
@@ -163,6 +164,7 @@ public class AdminPageController implements Initializable {
         Stage stage = (Stage) table_dish.getScene().getWindow();
         try {
             stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../../resources/views/login.fxml")))));
+            stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
             AlertService.showError();
@@ -210,7 +212,7 @@ public class AdminPageController implements Initializable {
 
             if (result.equals(ButtonType.YES)) {
                 dishDAO.delete(td.getId());
-                updateDishTable();
+                displayDishes();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -234,7 +236,7 @@ public class AdminPageController implements Initializable {
         if (result.equals(ButtonType.YES)) {
             try {
                 orderDAO.deleteAll();
-                updateOrderTable();
+                displayOrders();
             } catch (SQLException e) {
                 e.printStackTrace();
                 AlertService.showError();
@@ -255,7 +257,7 @@ public class AdminPageController implements Initializable {
         if (result.equals(ButtonType.YES)) {
             try {
                 dishDAO.setActivation(td.getActive().equals("Inaktiv"), td.getId());
-                updateDishTable();
+                displayDishes();
             } catch (SQLException e) {
                 e.printStackTrace();
                 AlertService.showError();

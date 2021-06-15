@@ -38,7 +38,7 @@ public class OrderDAO extends DAO implements iOrderDAO {
                     rs.getInt("id"),
                     orderpositionDAO.getAllByOrderId(rs.getInt("id")),
                     rs.getDate("orderdate"),
-                    userDAO.get(rs.getInt("userid")).get(),
+                    userDAO.get(rs.getInt("userid")).orElseThrow(),
                     rs.getDouble("discount")
             ));
         }
@@ -86,7 +86,7 @@ public class OrderDAO extends DAO implements iOrderDAO {
                     rs.getInt("id"),
                     orderpositionDAO.getAllByOrderId(rs.getInt("id")),
                     rs.getDate("orderdate"),
-                    userDAO.get(rs.getInt("userid")).get(),
+                    userDAO.get(rs.getInt("userid")).orElseThrow(),
                     rs.getDouble("discount")
             ));
         }

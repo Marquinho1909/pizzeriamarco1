@@ -26,13 +26,13 @@ public class OrderHistoryModalController extends ModalController implements Init
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO("Order");
-        updateDishTable();
+        displayDishes();
     }
 
     /**
      * gets all dishes and displays them in table
      */
-    public void updateDishTable() {
+    public void displayDishes() {
         table_order.getItems().clear();
         List<Order> orders;
         try {

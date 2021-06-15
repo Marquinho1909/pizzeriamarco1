@@ -59,7 +59,7 @@ public class LoginController implements Initializable {
                 else if (user.get().getClass() == Admin.class)
                     stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../../resources/views/admin/admin_page.fxml")))));
 
-                stage.setMaximized(true);
+                stage.centerOnScreen();
             } else
                 error_msg.setVisible(true);
         } catch (IOException | SQLException e) {
@@ -76,6 +76,7 @@ public class LoginController implements Initializable {
         Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
         try {
             stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../../resources/views/register.fxml")))));
+            stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
             AlertService.showError();

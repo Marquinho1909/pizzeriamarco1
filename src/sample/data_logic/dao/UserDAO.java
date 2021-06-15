@@ -183,7 +183,7 @@ public class UserDAO extends DAO implements iUserDAO {
      */
     @Override
     public Optional<User> getUserByEmailAndPassword(String email, String password) throws SQLException {
-        User user = null;
+        User user;
         PreparedStatement prep = connection.prepareStatement("SELECT * FROM User u LEFT JOIN Address a ON u.addressid = a.id WHERE email=? AND password=?;");
         prep.setString(1, email);
         prep.setString(2, password);
@@ -194,8 +194,9 @@ public class UserDAO extends DAO implements iUserDAO {
                 user = convertToAdmin(rs);
             else
                 user = convertToCostumer(rs);
+            return Optional.of(user);
         }
-        return Optional.of(user);
+        return Optional.empty();
     }
 
     /**

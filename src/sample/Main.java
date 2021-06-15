@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class Main extends Application {
 
@@ -18,11 +19,12 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws IOException {
         JDBCClient JDBC = new JDBCClient();
         JDBC.initializeDatabase();
-        Parent root = FXMLLoader.load(getClass().getResource("../resources/views/login.fxml"));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../resources/views/login.fxml")));
         primaryStage.setTitle("Pizzeria Marco");
         primaryStage.setMinHeight(400);
         primaryStage.setMinWidth(640);
         primaryStage.setScene(new Scene(root));
+        primaryStage.centerOnScreen();
         primaryStage.show();
     }
 }

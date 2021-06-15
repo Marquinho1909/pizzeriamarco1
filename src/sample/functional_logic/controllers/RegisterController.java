@@ -65,7 +65,7 @@ public class RegisterController implements Initializable {
                 UserSessionSingleton.currentSession().setUser(userDAO.getUserByEmailAndPassword(email_input.getText(), password_input.getText()).orElseThrow());
                 Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
                 stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../../resources/views/customer/customer_page.fxml")))));
-                stage.setMaximized(true);
+                stage.centerOnScreen();
             } else {
                 error_msg.setVisible(true);
             }
@@ -83,6 +83,7 @@ public class RegisterController implements Initializable {
         try {
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../../../resources/views/login.fxml")))));
+            stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
         }

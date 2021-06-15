@@ -98,7 +98,7 @@ public class ProfileEditModalController extends ModalController implements Initi
                                 email_input.getText(),
                                 password_input.getText()
                         ));
-            UserSessionSingleton.currentSession().setUser(userDAO.get(UserSessionSingleton.currentSession().getUser().getId()).get());
+            UserSessionSingleton.currentSession().setUser(userDAO.get(UserSessionSingleton.currentSession().getUser().getId()).orElseThrow());
             setStatus(ModalStatus.SUCCESS);
         } catch (SQLException e) {
             e.printStackTrace();

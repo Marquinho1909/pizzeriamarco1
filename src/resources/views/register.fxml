@@ -11,8 +11,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.functional_logic.controllers.RegisterController">
-   <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="93.0" prefWidth="639.0" text="Pizzeria Marco">
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="650.0"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.functional_logic.controllers.RegisterController">
+   <Label alignment="CENTER" contentDisplay="CENTER" text="Pizzeria Marco">
       <font>
          <Font name="System Bold" size="50.0" />
       </font>
@@ -26,7 +27,7 @@
       <fx:define>
       <ToggleGroup fx:id="gender_group" />
    </fx:define>
-      <RadioButton selected="true" text="Herr" userData="m">
+      <RadioButton selected="true" toggleGroup="$gender_group" text="Herr" userData="m">
          <HBox.margin>
             <Insets right="100.0" />
          </HBox.margin>

@@ -102,7 +102,7 @@ public class OrderModalController extends ModalController implements Initializab
                             coupon_check.isSelected() ? coupon.getValue() : 0
                     )
             ) != 0) {
-                if (coupon != null) {
+                if (coupon_check.isSelected()) {
                     couponDAO.delete(coupon.getId());
                     coupon = null;
                 }
