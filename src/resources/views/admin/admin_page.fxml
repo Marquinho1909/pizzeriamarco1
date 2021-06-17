@@ -188,17 +188,17 @@
         </VBox.margin>
         <Button onAction="#openDishCreationModal" text="Gericht erstellen">
             <HBox.margin>
-                <Insets right="20.0"/>
+                <Insets right="20.0" bottom="30.0"/>
             </HBox.margin>
         </Button>
         <Button onAction="#deleteDish" text="Gericht löschen">
             <HBox.margin>
-                <Insets left="20.0" right="20.0"/>
+                <Insets left="20.0" right="20.0" bottom="30.0"/>
             </HBox.margin>
         </Button>
         <Button onAction="#changeDishActivation" text="Gericht de-/aktivieren">
             <HBox.margin>
-                <Insets left="20.0"/>
+                <Insets left="20.0" bottom="30.0"/>
             </HBox.margin>
         </Button>
     </HBox>

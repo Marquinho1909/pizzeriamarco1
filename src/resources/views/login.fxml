@@ -27,9 +27,9 @@
             <Insets bottom="10.0" top="30.0"/>
         </VBox.margin>
         <Label text="E-Mail:">
-            <opaqueInsets>
-                <Insets/>
-            </opaqueInsets>
+            <HBox.margin>
+                <Insets right="10.0"/>
+            </HBox.margin>
         </Label>
         <TextField fx:id="email_input">
             <HBox.margin>
@@ -42,9 +42,6 @@
             </HBox.margin>
         </Label>
         <PasswordField fx:id="password_input">
-            <HBox.margin>
-                <Insets/>
-            </HBox.margin>
         </PasswordField>
         <Button alignment="CENTER" contentDisplay="CENTER" onAction="#login" text="Login">
             <HBox.margin>

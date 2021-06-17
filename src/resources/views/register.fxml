@@ -111,7 +111,7 @@
    </Button>
    <Button onAction="#returnToLoginPage" text="Zurück zum Login">
       <VBox.margin>
-         <Insets bottom="10.0" />
+         <Insets bottom="10.0" top="10.0" />
       </VBox.margin>
    </Button>
 </VBox>
