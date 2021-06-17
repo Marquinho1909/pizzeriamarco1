@@ -35,10 +35,6 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         userDAO = (UserDAO) DAOFactory.getInstance().getDAO("User");
-
-        // TODO Can later be deleted, easier for development
-        email_input.setText("admin2@dummy.com");
-        password_input.setText("topsecret");
     }
 
     /**

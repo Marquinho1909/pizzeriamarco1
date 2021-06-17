@@ -65,6 +65,9 @@ public class CustomerPageController implements Initializable {
         }
     }
 
+    /**
+     * fetches and displays all categories in filtering option of combobox
+     */
     public void displayCategories() {
         categories_cb.getItems().clear();
         categories_cb.getItems().add(new Category(0, "Alle anzeigen"));
@@ -98,50 +101,76 @@ public class CustomerPageController implements Initializable {
         } else {
             shownCategories = categories;
         }
-
+        boolean colorDarker;
 
         for (Category c: shownCategories) {
-            boolean bcolor = false;
-            Label caName = new Label(c.getName());
-            caName.setStyle("-fx-font-weight: bold;");
-            caName.setStyle("-fx-font-size: 25;");
-
-            HBox cahBox = new HBox(caName);
-            cahBox.setAlignment(Pos.CENTER);
-            cahBox.setPrefHeight(40);
-
-            dishlist.getChildren().add(cahBox);
+            colorDarker = false;
+            createCategoryEntry(c);
             List<Dish> caDishes = filteredDishes.stream().filter(d -> d.getCategories().contains(c)).collect(Collectors.toList());
             for (Dish dish : caDishes) {
-                Label name = new Label(dish.getId() + ". " + dish.getName());
-                name.setPrefWidth(500);
-
-                Label price = new Label(transformPrice(dish.getPrice()));
-                price.setPrefWidth(70);
-                price.setContentDisplay(ContentDisplay.CENTER);
-                price.setAlignment(Pos.CENTER);
-
-                Spinner<Integer> sAmount = new Spinner<>();
-                sAmount.setPrefWidth(80);
-                sAmount.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20));
-                sAmount.getValueFactory().setValue(1);
-
-                Button btn = new Button("Hinzufügen");
-                btn.setPrefWidth(100);
-                btn.setOnAction((e) -> addToCart(dish, sAmount.getValue()));
-
-                HBox hBox = new HBox(name, price, sAmount, btn);
-                hBox.setAlignment(Pos.CENTER);
-                hBox.setPrefHeight(40);
-                hBox.setSpacing(10);
-
-                if (bcolor = !bcolor) hBox.setStyle("-fx-background-color: #e3e3e3;");
-                else hBox.setStyle("-fx-background-color: #eeeeee;");
-
-                dishlist.getChildren().add(hBox);
+                createDishEntry(dish, colorDarker);
+                colorDarker = !colorDarker;
             }
         }
+        List<Dish> uncat = dishes.stream().filter(d -> d.getCategories().isEmpty()).collect(Collectors.toList());
+        if (!uncat.isEmpty()) {
+            createCategoryEntry(new Category("Unkategorisiert"));
+            colorDarker = false;
+            for (Dish dish : uncat) {
+                createDishEntry(dish, colorDarker);
+                colorDarker = !colorDarker;
+            }
+        }
+    }
 
+    /**
+     * creates an entry of category in menu
+     * @param category to create entry of
+     */
+    private void createCategoryEntry(Category category) {
+        Label caName = new Label(category.getName());
+        caName.setStyle("-fx-font-weight: bold;");
+        caName.setStyle("-fx-font-size: 25;");
+
+        HBox cahBox = new HBox(caName);
+        cahBox.setAlignment(Pos.CENTER);
+        cahBox.setPrefHeight(40);
+
+        dishlist.getChildren().add(cahBox);
+    }
+
+    /**
+     * creates an entry of dish in menu
+     * @param dish to create entry of
+     * @param colorDarker background color to enable switching colors, between light and darker color
+     */
+    private void createDishEntry(Dish dish, boolean colorDarker) {
+        Label name = new Label(dish.getId() + ". " + dish.getName());
+        name.setPrefWidth(500);
+
+        Label price = new Label(transformPrice(dish.getPrice()));
+        price.setPrefWidth(70);
+        price.setContentDisplay(ContentDisplay.CENTER);
+        price.setAlignment(Pos.CENTER);
+
+        Spinner<Integer> sAmount = new Spinner<>();
+        sAmount.setPrefWidth(80);
+        sAmount.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20));
+        sAmount.getValueFactory().setValue(1);
+
+        Button btn = new Button("Hinzufügen");
+        btn.setPrefWidth(100);
+        btn.setOnAction((e) -> addToCart(dish, sAmount.getValue()));
+
+        HBox hBox = new HBox(name, price, sAmount, btn);
+        hBox.setAlignment(Pos.CENTER);
+        hBox.setPrefHeight(40);
+        hBox.setSpacing(10);
+
+        if (colorDarker) hBox.setStyle("-fx-background-color: #e3e3e3;");
+        else hBox.setStyle("-fx-background-color: #eeeeee;");
+
+        dishlist.getChildren().add(hBox);
     }
 
     /**
