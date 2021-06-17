@@ -112,13 +112,15 @@ public class CustomerPageController implements Initializable {
                 colorDarker = !colorDarker;
             }
         }
-        List<Dish> uncat = dishes.stream().filter(d -> d.getCategories().isEmpty()).collect(Collectors.toList());
-        if (!uncat.isEmpty()) {
-            createCategoryEntry(new Category("Unkategorisiert"));
-            colorDarker = false;
-            for (Dish dish : uncat) {
-                createDishEntry(dish, colorDarker);
-                colorDarker = !colorDarker;
+        if (categories_cb.getValue().getId() == 0) {
+            List<Dish> uncat = dishes.stream().filter(d -> d.getCategories().isEmpty()).collect(Collectors.toList());
+            if (!uncat.isEmpty()) {
+                createCategoryEntry(new Category("Unkategorisiert"));
+                colorDarker = false;
+                for (Dish dish : uncat) {
+                    createDishEntry(dish, colorDarker);
+                    colorDarker = !colorDarker;
+                }
             }
         }
     }
