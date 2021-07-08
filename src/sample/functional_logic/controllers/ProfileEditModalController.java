@@ -65,6 +65,7 @@ public class ProfileEditModalController extends ModalController implements Initi
 
     /**
      * saves changes for Admin or Customer
+     * notifies AdminPage- / CustomerPage-Observer with new name to update menu button on page
      * @param actionEvent ae
      */
     public void save(ActionEvent actionEvent) {
@@ -100,6 +101,8 @@ public class ProfileEditModalController extends ModalController implements Initi
                         ));
             UserSessionSingleton.currentSession().setUser(userDAO.get(UserSessionSingleton.currentSession().getUser().getId()).orElseThrow());
             setStatus(ModalStatus.SUCCESS);
+            setChanged();
+            notifyObservers(lname_input.getText() + ", " + fname_input.getText());
         } catch (SQLException e) {
             e.printStackTrace();
             setStatus(ModalStatus.FAILURE);

@@ -22,12 +22,12 @@ import sample.functional_logic.ModalService;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
-public class AdminPageController implements Initializable {
+/**
+ * Observer that observes ProfileEditController, when notified changes menu button name to newly edited
+ */
+public class AdminPageController implements Initializable, Observer {
     @FXML private TableView<TableDish> table_dish;
     @FXML private TableView<TableCustomer> table_user;
     @FXML private TableView<TableOrder> table_order;
@@ -43,7 +43,7 @@ public class AdminPageController implements Initializable {
         orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO("Order");
         dishDAO = (DishDAO) DAOFactory.getInstance().getDAO("Dish");
 
-        setMenuBtnNameToCurrent();
+        setMenuBtnName(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
             displayCustomers();
             displayOrders();
             displayDishes();
@@ -179,10 +179,9 @@ public class AdminPageController implements Initializable {
     public void openAccountEditModal() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../../../resources/views/admin/admin_profile_edit_modal.fxml"));
         try {
-            ModalController.ModalStatus result = ModalService.openModal((Stage) table_dish.getScene().getWindow(), loader, loader.load());
+            ModalController.ModalStatus result = ModalService.openModal((Stage) table_dish.getScene().getWindow(), loader, loader.load(), this);
             if (result == ModalController.ModalStatus.SUCCESS) {
                 AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Änderungen wurden gespeichert", ButtonType.OK);
-                setMenuBtnNameToCurrent();
             } else if (result == ModalController.ModalStatus.FAILURE)
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.", ButtonType.OK);
         } catch (IOException e) {
@@ -224,8 +223,8 @@ public class AdminPageController implements Initializable {
     /**
      * sets displayed name in menu button to currently logged in user
      */
-    private void setMenuBtnNameToCurrent() {
-        menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+    private void setMenuBtnName(String name) {
+        menu_btn.setText(name);
     }
 
     /**
@@ -265,6 +264,16 @@ public class AdminPageController implements Initializable {
             }
 
         }
+    }
+
+    /**
+     * updates name on menu button when profile has been edited
+     * @param o observable
+     * @param arg new name
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        setMenuBtnName((String) arg);
     }
 
     /**

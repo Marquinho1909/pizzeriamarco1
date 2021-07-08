@@ -27,13 +27,13 @@ import sample.functional_logic.ModalService;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class CustomerPageController implements Initializable {
+/**
+ * Observer that observes ProfileEditController, when notified changes menu button name to newly edited
+ */
+public class CustomerPageController implements Initializable, Observer {
     @FXML private ComboBox<Category> categories_cb;
     @FXML private Label error_msg;
     @FXML private VBox dishlist;
@@ -312,11 +312,10 @@ public class CustomerPageController implements Initializable {
     public void openAccountEditModal() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../../../resources/views/customer/customer_profile_edit_modal.fxml"));
         try {
-            ModalController.ModalStatus result = ModalService.openModal((Stage) dishlist.getScene().getWindow(), loader, loader.load());
+            ModalController.ModalStatus result = ModalService.openModal((Stage) dishlist.getScene().getWindow(), loader, loader.load(), this);
 
             if (result == ModalController.ModalStatus.SUCCESS) {
                 AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Änderungen wurden gespeichert", ButtonType.OK);
-                menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
             } else if (result == ModalController.ModalStatus.FAILURE)
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.", ButtonType.OK);
         } catch (IOException e) {
@@ -338,5 +337,22 @@ public class CustomerPageController implements Initializable {
             e.printStackTrace();
             AlertService.showError();
         }
+    }
+
+    /**
+     * sets displayed name in menu button to currently logged in user
+     */
+    private void setMenuBtnName(String name) {
+        menu_btn.setText(name);
+    }
+
+    /**
+     * updates name on menu button when profile has been edited
+     * @param o observable
+     * @param arg new name
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        setMenuBtnName((String) arg);
     }
 }

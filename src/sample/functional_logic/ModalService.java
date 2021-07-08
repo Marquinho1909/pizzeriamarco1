@@ -7,6 +7,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.functional_logic.controllers.ModalController;
 
+import java.util.Observer;
 import java.util.logging.Logger;
 
 /**
@@ -21,8 +22,11 @@ public class ModalService {
      * @param root loader.load(), happens extern in case external controller needs root's controller first
      * @return result of user action as modalStatus of controller
      */
-    public static ModalController.ModalStatus openModal(Stage main, FXMLLoader loader, Parent root) {
+    public static ModalController.ModalStatus openModal(Stage main, FXMLLoader loader, Parent root, Observer observer) {
         ModalController controller = loader.getController();
+
+        if (observer != null)
+            controller.addObserver(observer);
 
         Stage modal = new Stage();
         modal.setScene(new Scene(root));
@@ -33,5 +37,9 @@ public class ModalService {
         Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("MODAL CLOSED WITH STATUS " + controller.getStatus());
 
         return controller.getStatus();
+    }
+
+    public static ModalController.ModalStatus openModal(Stage main, FXMLLoader loader, Parent root) {
+        return openModal(main, loader, root, null);
     }
 }
