@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Text?>
 
 <VBox alignment="CENTER" prefHeight="800.0" prefWidth="1200.0" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="sample.functional_logic.controllers.AdminPageController">
+      fx:controller="resources.GUIController.AdminPageGUIController">
     <MenuBar>
         <Menu fx:id="menu_btn">
             <MenuItem onAction="#openAccountEditModal" text="Bearbeiten"/>

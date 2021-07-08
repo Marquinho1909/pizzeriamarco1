@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="400.0" prefWidth="650.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.functional_logic.controllers.OrderModalController">
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="650.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="resources.GUIController.OrderModalGUIController">
    <Label text="Bestellbestätigung">
       <font>
          <Font size="30.0" />

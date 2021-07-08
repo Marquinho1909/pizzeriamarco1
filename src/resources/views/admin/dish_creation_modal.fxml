@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="400.0" prefWidth="550.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.functional_logic.controllers.DishCreationModalController">
+<VBox alignment="TOP_CENTER" prefHeight="400.0" prefWidth="550.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="resources.GUIController.DishCreationModalGUIController">
    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="60.0" text="Gericht erstellen">
       <font>
          <Font size="30.0" />
