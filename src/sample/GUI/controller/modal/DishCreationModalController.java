@@ -1,4 +1,4 @@
-package resources.GUIController;
+package sample.GUI.controller.modal;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -7,11 +7,11 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import sample.GUI.AlertService;
+import sample.GUI.GUIHandler;
+import sample.GUI.controller.Modal;
 import sample.data_logic.dto.Category;
 import sample.data_logic.dto.Dish;
-import sample.functional_logic.AlertService;
-import sample.functional_logic.controllers.DishCreationModalController;
-import sample.functional_logic.controllers.ModalController;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -19,19 +19,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DishCreationModalGUIController extends ModalController implements Initializable {
+public class DishCreationModalController extends Modal implements Initializable {
     public Spinner<Double> price_input;
     public TextField name_input;
     public Label error_msg;
     public VBox categories_list;
     public TextField category_input;
 
-    DishCreationModalController controller;
+    public DishCreationModalController(GUIHandler guiHandler) {
+        super(guiHandler);
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        controller = new DishCreationModalController();
-
         error_msg.setVisible(false);
         price_input.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(1, 20, 1.0, 0.1));
 
@@ -58,7 +58,7 @@ public class DishCreationModalGUIController extends ModalController implements I
                 checked_categories.add((Category) cb.getUserData());
         }
         try {
-            controller.saveDish(new Dish(name_input.getText(), checked_categories, price_input.getValue(), true));
+            guiHandler.saveDish(new Dish(name_input.getText(), checked_categories, price_input.getValue(), true));
             setStatus(ModalStatus.SUCCESS);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -83,18 +83,14 @@ public class DishCreationModalGUIController extends ModalController implements I
      */
     public void displayCategories() {
         categories_list.getChildren().clear();
-        try {
-            for (Category c : controller.getCategories()) {
-                CheckBox cb = new CheckBox(c.getName());
-                cb.setUserData(c);
-                cb.setPrefWidth(150);
-                VBox.setMargin(cb, new Insets(4, 0, 0, 5));
-                categories_list.getChildren().add(cb);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            AlertService.showError();
+        for (Category c : guiHandler.getCategories()) {
+            CheckBox cb = new CheckBox(c.getName());
+            cb.setUserData(c);
+            cb.setPrefWidth(150);
+            VBox.setMargin(cb, new Insets(4, 0, 0, 5));
+            categories_list.getChildren().add(cb);
         }
+
     }
 
     /**
@@ -108,14 +104,14 @@ public class DishCreationModalGUIController extends ModalController implements I
             return;
         }
         try {
-            if (controller.doesCategoryExist(cInput)) {
+            if (guiHandler.doesCategoryExist(cInput)) {
                 error_msg.setText("Diese Kategorie existiert bereits");
                 error_msg.setVisible(true);
                 return;
             }
             error_msg.setVisible(false);
 
-            controller.saveCategory(new Category(cInput));
+            guiHandler.saveCategory(new Category(cInput));
             displayCategories();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -131,7 +127,7 @@ public class DishCreationModalGUIController extends ModalController implements I
                 checked_categories.add((Category) cb.getUserData());
         }
         try {
-            if (!controller.canAllCategoriesBeDeleted(checked_categories)) {
+            if (!guiHandler.canAllCategoriesBeDeleted(checked_categories)) {
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehlgeschlagen", "Mindestens eines der ausgewählten Kategorien hat Gerichte zugeordnet. Löschen Sie diese und versuchen Sie es nochmal", ButtonType.OK);
                 return;
             }
@@ -142,7 +138,7 @@ public class DishCreationModalGUIController extends ModalController implements I
             ButtonType result = AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Kategorien löschen", content.substring(0, content.length() - 2), ButtonType.YES, ButtonType.CANCEL);
 
             if (result.equals(ButtonType.YES)) {
-                controller.deleteCategories(checked_categories);
+                guiHandler.deleteCategories(checked_categories);
                 displayCategories();
             }
         } catch (SQLException e) {

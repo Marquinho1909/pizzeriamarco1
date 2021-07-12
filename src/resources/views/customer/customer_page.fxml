@@ -13,7 +13,7 @@
 
 <?import javafx.scene.control.ComboBox?>
 <VBox alignment="CENTER" prefHeight="800.0" prefWidth="1200.0"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="resources.GUIController.CustomerPageGUIController">
+      xmlns:fx="http://javafx.com/fxml/1">
    <MenuBar VBox.vgrow="NEVER">
       <Menu fx:id="menu_btn">
          <MenuItem onAction="#openOrderHistoryModal" text="Bestellhistorie" />

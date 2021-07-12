@@ -72,28 +72,6 @@ public class OrderDAO extends DAO implements iOrderDAO {
     }
 
     /**
-     * returns all orders orderd by one user of given id
-     * @param userid of user
-     * @return all found orders of user
-     * @throws SQLException sql exception
-     */
-    @Override
-    public List<Order> getAllByUserId(int userid) throws SQLException {
-        List<Order> orders = new ArrayList<>();
-        ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM Dishorder WHERE userid=" + userid);
-        while (rs.next()) {
-            orders.add(new Order(
-                    rs.getInt("id"),
-                    orderpositionDAO.getAllByOrderId(rs.getInt("id")),
-                    rs.getDate("orderdate"),
-                    userDAO.get(rs.getInt("userid")).orElseThrow(),
-                    rs.getDouble("discount")
-            ));
-        }
-        return orders;
-    }
-
-    /**
      * deletes all orders and orderpositions from database
      * @throws SQLException sql exception
      */

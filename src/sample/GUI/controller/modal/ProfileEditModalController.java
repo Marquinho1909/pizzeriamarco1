@@ -1,4 +1,4 @@
-package resources.GUIController;
+package sample.GUI.controller.modal;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,19 +9,19 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
+import sample.GUI.AlertService;
+import sample.GUI.GUIHandler;
 import sample.data_logic.UserSessionSingleton;
 import sample.data_logic.dto.Admin;
 import sample.data_logic.dto.Customer;
 import sample.data_logic.dto.User;
-import sample.functional_logic.AlertService;
-import sample.functional_logic.controllers.ModalController;
-import sample.functional_logic.controllers.ProfileEditModalController;
+import sample.GUI.controller.Modal;
 
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-public class ProfileEditModalGUIController extends ModalController implements Initializable {
+public class ProfileEditModalController extends Modal implements Initializable {
     @FXML
     private RadioButton t_m;
     @FXML
@@ -47,11 +47,12 @@ public class ProfileEditModalGUIController extends ModalController implements In
     @FXML
     private Label error_msg;
 
-    ProfileEditModalController controller;
+    public ProfileEditModalController(GUIHandler guiHandler) {
+        super(guiHandler);
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        controller = new ProfileEditModalController();
         setUserData(UserSessionSingleton.currentSession().getUser());
     }
 
@@ -89,9 +90,8 @@ public class ProfileEditModalGUIController extends ModalController implements In
         error_msg.setVisible(false);
 
         try {
-
             if (UserSessionSingleton.currentSession().getUser().getClass() == Customer.class)
-                controller.saveChanges(UserSessionSingleton.currentSession().getUser().getId(),
+                guiHandler.saveProfileChanges(UserSessionSingleton.currentSession().getUser().getId(),
                         new Customer(
                                 fname_input.getText(),
                                 lname_input.getText(),
@@ -105,7 +105,7 @@ public class ProfileEditModalGUIController extends ModalController implements In
                                 password_input.getText()
                         ));
             else
-                controller.saveChanges(UserSessionSingleton.currentSession().getUser().getId(),
+                guiHandler.saveProfileChanges(UserSessionSingleton.currentSession().getUser().getId(),
                         new Admin(
                                 fname_input.getText(),
                                 lname_input.getText(),
@@ -114,8 +114,6 @@ public class ProfileEditModalGUIController extends ModalController implements In
                                 password_input.getText()
                         ));
             setStatus(ModalStatus.SUCCESS);
-            setChanged();
-            notifyObservers(lname_input.getText() + ", " + fname_input.getText());
         } catch (SQLException e) {
             e.printStackTrace();
             setStatus(ModalStatus.FAILURE);

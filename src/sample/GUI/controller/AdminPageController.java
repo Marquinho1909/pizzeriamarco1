@@ -1,35 +1,30 @@
-package resources.GUIController;
+package sample.GUI.controller;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.TableView;
-import javafx.stage.Stage;
+import sample.GUI.AlertService;
+import sample.GUI.GUIHandler;
+import sample.GUI.ParentController;
 import sample.data_logic.UserSessionSingleton;
 import sample.data_logic.dto.*;
-import sample.functional_logic.AlertService;
-import sample.functional_logic.ModalService;
-import sample.functional_logic.controllers.AdminPageController;
-import sample.functional_logic.controllers.CustomerPageController;
-import sample.functional_logic.controllers.ModalController;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Observer that observes ProfileEditController, when notified changes menu button name to newly edited
  */
-public class AdminPageGUIController implements Initializable, Observer {
+public class AdminPageController extends ParentController {
     @FXML
     public TableView<TableDish> table_dish;
     @FXML
@@ -39,12 +34,17 @@ public class AdminPageGUIController implements Initializable, Observer {
     @FXML
     public Menu menu_btn;
 
-    AdminPageController controller;
+    public AdminPageController(GUIHandler guiHandler) {
+        super(guiHandler);
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        controller = new AdminPageController();
+        update();
+    }
 
+    @Override
+    public void update() {
         setMenuBtnName(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
         displayCustomers();
         displayOrders();
@@ -57,22 +57,16 @@ public class AdminPageGUIController implements Initializable, Observer {
     public void displayCustomers() {
         table_user.getItems().clear();
 
-        List<Customer> customers;
-        try {
-            customers = controller.getCustomers();
-            for (Customer c : customers)
-                table_user.getItems().add(new TableCustomer(
-                        c.getId(),
-                        c.getFirstName(),
-                        c.getLastname(),
-                        "" + c.getGender(),
-                        c.getAddress().getStreet() + " " + c.getAddress().getHouseNumber() + ", " + c.getAddress().getZipCode(),
-                        c.getEmail()
-                ));
-        } catch (SQLException e) {
-            e.printStackTrace();
-            AlertService.showError();
-        }
+        List<Customer> customers = guiHandler.getCustomers();
+        for (Customer c : customers)
+            table_user.getItems().add(new TableCustomer(
+                    c.getId(),
+                    c.getFirstName(),
+                    c.getLastname(),
+                    "" + c.getGender(),
+                    c.getAddress().getStreet() + " " + c.getAddress().getHouseNumber() + ", " + c.getAddress().getZipCode(),
+                    c.getEmail()
+            ));
 
     }
 
@@ -82,22 +76,16 @@ public class AdminPageGUIController implements Initializable, Observer {
     public void displayOrders() {
         table_order.getItems().clear();
 
-        List<Order> orders;
-        try {
-            orders = controller.getOrders();
-            for (Order o : orders)
-                table_order.getItems().add(new TableOrder(
-                        o.getId(),
-                        o.getOrderDate().toString(),
-                        o.getOrderpositions(),
-                        o.getDiscount(),
-                        o.getUser().getId()
-                ));
-        } catch (SQLException e) {
-            e.printStackTrace();
-            AlertService.showError();
-        }
+        List<Order> orders = guiHandler.getOrders();
 
+        for (Order o : orders)
+            table_order.getItems().add(new TableOrder(
+                    o.getId(),
+                    o.getOrderDate().toString(),
+                    o.getOrderpositions(),
+                    o.getDiscount(),
+                    o.getUser().getId()
+            ));
     }
 
     /**
@@ -106,13 +94,8 @@ public class AdminPageGUIController implements Initializable, Observer {
     public void displayDishes() {
         table_dish.getItems().clear();
 
-        List<Dish> dishes = new ArrayList<>();
-        try {
-            dishes = controller.getDishes();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            AlertService.showError();
-        }
+        List<Dish> dishes = guiHandler.getDishes();
+
         for (Dish d : dishes)
             table_dish.getItems().add(new TableDish(
                     d.getId(),
@@ -136,7 +119,7 @@ public class AdminPageGUIController implements Initializable, Observer {
 
         if (result.equals(ButtonType.YES)) {
             try {
-                controller.makeCustomerAdmin(tc.getId());
+                guiHandler.makeCustomerAdmin(tc.getId());
                 displayCustomers();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -149,9 +132,8 @@ public class AdminPageGUIController implements Initializable, Observer {
      * Opens DishCreationModal and updates dish table after closing
      */
     public void openDishCreationModal() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../views/admin/dish_creation_modal.fxml"));
         try {
-            ModalService.openModal((Stage) table_dish.getScene().getWindow(), loader, loader.load());
+            guiHandler.openDishCreationModal();
             displayDishes();
         } catch (IOException e) {
             e.printStackTrace();
@@ -164,27 +146,24 @@ public class AdminPageGUIController implements Initializable, Observer {
      * logs user out, set UserSession to null and redirects to login page
      */
     public void logout() {
-        Stage stage = (Stage) table_dish.getScene().getWindow();
         try {
-            stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../views/login.fxml")))));
-            stage.centerOnScreen();
+            guiHandler.navigateToLoginPage();
         } catch (IOException e) {
             e.printStackTrace();
             AlertService.showError();
         }
-        controller.logout();
+        guiHandler.logout();
     }
 
     /**
      * opens AccountEditModal
      */
     public void openAccountEditModal() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../resources/views/admin/admin_profile_edit_modal.fxml"));
         try {
-            ModalController.ModalStatus result = ModalService.openModal((Stage) table_dish.getScene().getWindow(), loader, loader.load(), this);
-            if (result == ModalController.ModalStatus.SUCCESS) {
+            Modal.ModalStatus result = guiHandler.openAdminProfileEditModal();
+            if (result == Modal.ModalStatus.SUCCESS) {
                 AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Änderungen wurden gespeichert", ButtonType.OK);
-            } else if (result == ModalController.ModalStatus.FAILURE)
+            } else if (result == Modal.ModalStatus.FAILURE)
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.", ButtonType.OK);
         } catch (IOException e) {
             e.printStackTrace();
@@ -201,7 +180,7 @@ public class AdminPageGUIController implements Initializable, Observer {
         if (td == null) return;
 
         try {
-            if (controller.canDishBeDeleted(td.getId())) {
+            if (guiHandler.canDishBeDeleted(td.getId())) {
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehlgeschlagen",
                         "Mindestens eine Bestellung in der Historie enthält dieses Gericht. Löschen Sie die Historie oder deaktivieren Sie das Gericht einfach", ButtonType.OK);
                 return;
@@ -212,7 +191,7 @@ public class AdminPageGUIController implements Initializable, Observer {
                             "sodass Kunden es weder sehen noch bestellen können bis zur Reaktivierung.", ButtonType.YES, ButtonType.NO);
 
             if (result.equals(ButtonType.YES)) {
-                controller.deleteDish(td.getId());
+                guiHandler.deleteDish(td.getId());
                 displayDishes();
             }
         } catch (SQLException e) {
@@ -236,7 +215,7 @@ public class AdminPageGUIController implements Initializable, Observer {
 
         if (result.equals(ButtonType.YES)) {
             try {
-                controller.deleteOrderHistory();
+                guiHandler.deleteOrderHistory();
                 displayOrders();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -257,7 +236,7 @@ public class AdminPageGUIController implements Initializable, Observer {
 
         if (result.equals(ButtonType.YES)) {
             try {
-                controller.setActivation(td.getActive().equals("Inaktiv"), td.getId());
+                guiHandler.setDishActivation(td.getId());
                 displayDishes();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -267,16 +246,7 @@ public class AdminPageGUIController implements Initializable, Observer {
         }
     }
 
-    /**
-     * updates name on menu button when profile has been edited
-     *
-     * @param o   observable
-     * @param arg new name
-     */
-    @Override
-    public void update(Observable o, Object arg) {
-        setMenuBtnName((String) arg);
-    }
+
 
     /**
      * Class for displaying Customer in table_customer
@@ -348,7 +318,7 @@ public class AdminPageGUIController implements Initializable, Observer {
                 sum += op.getAmount() * op.getDish().getPrice();
                 s.append(op.getAmount()).append("x ").append(op.getDish().getName()).append(", ");
             }
-            String st_sum = CustomerPageController.transformPrice(sum);
+            String st_sum = GUIHandler.transformPrice(sum);
 
             if (discount != 0.0)
                 st_sum += " (-" + discount * 100 + "%)";
@@ -406,7 +376,7 @@ public class AdminPageGUIController implements Initializable, Observer {
                 this.categories = new SimpleStringProperty(s.substring(0, s.length() - 2));
 
             } else this.categories = new SimpleStringProperty("");
-            this.price = new SimpleStringProperty(CustomerPageController.transformPrice(price));
+            this.price = new SimpleStringProperty(GUIHandler.transformPrice(price));
         }
 
         public int getId() {

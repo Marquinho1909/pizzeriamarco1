@@ -1,37 +1,30 @@
-package resources.GUIController;
+package sample.GUI.controller;
 
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import sample.GUI.AlertService;
+import sample.GUI.GUIHandler;
+import sample.GUI.ParentController;
 import sample.data_logic.UserSessionSingleton;
 import sample.data_logic.dto.Category;
 import sample.data_logic.dto.Dish;
 import sample.data_logic.dto.OrderPosition;
-import sample.functional_logic.AlertService;
-import sample.functional_logic.ModalService;
-import sample.functional_logic.controllers.CustomerPageController;
-import sample.functional_logic.controllers.ModalController;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Observable;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
  * Observer that observes ProfileEditController, when notified changes menu button name to newly edited
  */
-public class CustomerPageGUIController implements Initializable, Observer {
+public class CustomerPageController extends ParentController {
     public ComboBox<Category> categories_cb;
     public Label error_msg;
     public VBox dishlist;
@@ -39,16 +32,21 @@ public class CustomerPageGUIController implements Initializable, Observer {
     public Label lTotal;
     public Menu menu_btn;
 
-    CustomerPageController controller;
+    public CustomerPageController(GUIHandler guiHandler) {
+        super(guiHandler);
+    }
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        controller = new CustomerPageController();
+    public void update() {
         menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
 
         displayCategories();
         displayDishes();
+    }
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        update();
     }
 
     /**
@@ -70,11 +68,8 @@ public class CustomerPageGUIController implements Initializable, Observer {
                 return new Category(s);
             }
         });
-        try {
-            categories_cb.getItems().addAll(controller.getCategories());
-        } catch (SQLException e) {
-            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
-        }
+
+        categories_cb.getItems().addAll(guiHandler.getCategories());
     }
 
     /**
@@ -82,43 +77,40 @@ public class CustomerPageGUIController implements Initializable, Observer {
      */
     public void displayDishes() {
         dishlist.getChildren().clear();
-        try {
-            List<Dish> dishes = controller.getDishes();
-            List<Dish> filteredDishes = dishes;
-            List<Category> shownCategories;
 
-            if (categories_cb.getValue().getId() != 0) {
-                filteredDishes = dishes.stream().filter(d -> d.getCategories().contains(categories_cb.getValue())).collect(Collectors.toList());
-                shownCategories = List.of(categories_cb.getValue());
-            } else {
-                shownCategories = controller.getCategories();
+        List<Dish> filteredDishes = guiHandler.getDishes();
+        List<Category> shownCategories;
+
+        if (categories_cb.getValue().getId() != 0) {
+            filteredDishes = guiHandler.getDishes().stream().filter(d -> d.getCategories().contains(categories_cb.getValue())).collect(Collectors.toList());
+            shownCategories = List.of(categories_cb.getValue());
+        } else {
+            shownCategories = guiHandler.getCategories();
+        }
+
+        boolean colorDarker;
+
+        for (Category c : shownCategories) {
+            colorDarker = false;
+            createCategoryEntry(c);
+            List<Dish> caDishes = filteredDishes.stream().filter(d -> d.getCategories().contains(c)).collect(Collectors.toList());
+            for (Dish dish : caDishes) {
+                createDishEntry(dish, colorDarker);
+                colorDarker = !colorDarker;
             }
-
-            boolean colorDarker;
-
-            for (Category c : shownCategories) {
+        }
+        if (categories_cb.getValue().getId() == 0) {
+            List<Dish> uncat = guiHandler.getDishes().stream().filter(d -> d.getCategories().isEmpty()).collect(Collectors.toList());
+            if (!uncat.isEmpty()) {
+                createCategoryEntry(new Category("Unkategorisiert"));
                 colorDarker = false;
-                createCategoryEntry(c);
-                List<Dish> caDishes = filteredDishes.stream().filter(d -> d.getCategories().contains(c)).collect(Collectors.toList());
-                for (Dish dish : caDishes) {
+                for (Dish dish : uncat) {
                     createDishEntry(dish, colorDarker);
                     colorDarker = !colorDarker;
                 }
             }
-            if (categories_cb.getValue().getId() == 0) {
-                List<Dish> uncat = dishes.stream().filter(d -> d.getCategories().isEmpty()).collect(Collectors.toList());
-                if (!uncat.isEmpty()) {
-                    createCategoryEntry(new Category("Unkategorisiert"));
-                    colorDarker = false;
-                    for (Dish dish : uncat) {
-                        createDishEntry(dish, colorDarker);
-                        colorDarker = !colorDarker;
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, bitte wenden Sie sich an den Support.", ButtonType.OK);
         }
+
     }
 
     /**
@@ -148,7 +140,7 @@ public class CustomerPageGUIController implements Initializable, Observer {
         Label name = new Label(dish.getId() + ". " + dish.getName());
         name.setPrefWidth(500);
 
-        Label price = new Label(CustomerPageController.transformPrice(dish.getPrice()));
+        Label price = new Label(GUIHandler.transformPrice(dish.getPrice()));
         price.setPrefWidth(70);
         price.setContentDisplay(ContentDisplay.CENTER);
         price.setAlignment(Pos.CENTER);
@@ -180,13 +172,9 @@ public class CustomerPageGUIController implements Initializable, Observer {
      * @param amount of dish
      */
     private void addToCart(Dish dish, Integer amount) {
-        for (OrderPosition o : controller.dishesInCart) {
-            if (controller.addedToExistingDish(o, amount, dish)) {
-                displayCart();
-                return;
-            }
+        if (!guiHandler.addedToExistingOrder(dish, amount)) {
+            guiHandler.addOrderToCart(new OrderPosition(dish, amount));
         }
-        controller.addOrderToCart(new OrderPosition(dish, amount));
         displayCart();
     }
 
@@ -199,7 +187,7 @@ public class CustomerPageGUIController implements Initializable, Observer {
 
         cart.getChildren().clear();
 
-        for (OrderPosition o : controller.dishesInCart) {
+        for (OrderPosition o : guiHandler.getCart()) {
             total += o.getDish().getPrice() * o.getAmount();
 
             //name
@@ -208,7 +196,7 @@ public class CustomerPageGUIController implements Initializable, Observer {
             HBox.setHgrow(name, Priority.ALWAYS);
 
             //price
-            Label price = new Label(CustomerPageController.transformPrice(o.getDish().getPrice() * o.getAmount()));
+            Label price = new Label(GUIHandler.transformPrice(o.getDish().getPrice() * o.getAmount()));
             price.setAlignment(Pos.CENTER);
             price.setContentDisplay(ContentDisplay.CENTER);
             price.setPrefWidth(40);
@@ -217,7 +205,7 @@ public class CustomerPageGUIController implements Initializable, Observer {
             Button btn = new Button("Entfernen");
             btn.setPrefWidth(80);
             btn.setOnAction((e) -> {
-                controller.removeOrder(o);
+                guiHandler.removeOrderFromCart(o.getId());
                 displayCart();
             });
 
@@ -236,35 +224,27 @@ public class CustomerPageGUIController implements Initializable, Observer {
             cart.getChildren().add(hbox);
         }
 
-        lTotal.setText("Total: " + CustomerPageController.transformPrice(total));
+        lTotal.setText("Total: " + GUIHandler.transformPrice(total));
     }
 
     /**
      * opens ordermodal and handles responds after modal closure through its status
-     *
-     * @param actionEvent ae
      */
-    public void openOrderModal(ActionEvent actionEvent) {
-        if (controller.dishesInCart.isEmpty()) {
+    public void openOrderModal() {
+        if (guiHandler.getCart().isEmpty()) {
             error_msg.setVisible(true);
             return;
         }
         error_msg.setVisible(false);
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../views/customer/order_modal.fxml"));
-        Parent root;
+
         try {
-            root = loader.load();
-            OrderModalGUIController omcontroller = loader.getController();
-            omcontroller.controller.dishesInCart = controller.dishesInCart;
-            omcontroller.displayDishes();
+            Modal.ModalStatus result = guiHandler.openOrderModal();
 
-            ModalController.ModalStatus result = ModalService.openModal((Stage) ((Node) actionEvent.getSource()).getScene().getWindow(), loader, root);
-
-            if (result == ModalController.ModalStatus.SUCCESS) {
+            if (result == Modal.ModalStatus.SUCCESS) {
                 AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Ihre Bestellung wurde erfolgreich aufgegeben", ButtonType.OK);
-                controller.dishesInCart.clear();
-                displayCart();
-            } else if (result == ModalController.ModalStatus.FAILURE)
+                guiHandler.getCart().clear();
+
+            } else if (result == Modal.ModalStatus.FAILURE)
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Ihre Bestellung konnte nicht aufgegeben werden.", ButtonType.OK);
         } catch (IOException e) {
             e.printStackTrace();
@@ -278,9 +258,8 @@ public class CustomerPageGUIController implements Initializable, Observer {
      * opens OrderHistoryModal
      */
     public void openOrderHistoryModal() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("..//views/customer/order_history_modal.fxml"));
         try {
-            ModalService.openModal((Stage) dishlist.getScene().getWindow(), loader, loader.load());
+            guiHandler.openOrderHistoryModal();
         } catch (IOException e) {
             e.printStackTrace();
             AlertService.showError();
@@ -291,13 +270,11 @@ public class CustomerPageGUIController implements Initializable, Observer {
      * opens AccountEditModal
      */
     public void openAccountEditModal() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../views/customer/customer_profile_edit_modal.fxml"));
         try {
-            ModalController.ModalStatus result = ModalService.openModal((Stage) dishlist.getScene().getWindow(), loader, loader.load(), this);
-
-            if (result == ModalController.ModalStatus.SUCCESS) {
+            Modal.ModalStatus result = guiHandler.openCustomerProfileEditModal();
+            if (result == Modal.ModalStatus.SUCCESS) {
                 AlertService.showAlert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Änderungen wurden gespeichert", ButtonType.OK);
-            } else if (result == ModalController.ModalStatus.FAILURE)
+            } else if (result == Modal.ModalStatus.FAILURE)
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehler", "Ein Fehler ist aufgetreten, Änderungen konnten nicht gespeichert werden.", ButtonType.OK);
         } catch (IOException e) {
             e.printStackTrace();
@@ -309,33 +286,13 @@ public class CustomerPageGUIController implements Initializable, Observer {
      * logs user out, sets UserSession to null and switches scene to Login-Scene
      */
     public void logout() {
-        Stage stage = (Stage) dishlist.getScene().getWindow();
         try {
-            stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../views/login.fxml")))));
-            controller.logout();
-            stage.centerOnScreen();
+            guiHandler.logout();
+            guiHandler.navigateToLoginPage();
         } catch (IOException e) {
             e.printStackTrace();
             AlertService.showError();
         }
-    }
-
-    /**
-     * sets displayed name in menu button to currently logged in user
-     */
-    private void setMenuBtnName(String name) {
-        menu_btn.setText(name);
-    }
-
-    /**
-     * updates name on menu button when profile has been edited
-     *
-     * @param o   observable
-     * @param arg new name
-     */
-    @Override
-    public void update(Observable o, Object arg) {
-        setMenuBtnName((String) arg);
     }
 
 }

@@ -1,56 +1,55 @@
-package resources.GUIController;
+package sample.GUI.controller;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
-import javafx.stage.Stage;
-import sample.data_logic.DAOFactory;
-import sample.data_logic.UserSessionSingleton;
-import sample.data_logic.dao.UserDAO;
+import sample.GUI.AlertService;
+import sample.GUI.GUIHandler;
+import sample.GUI.ParentController;
 import sample.data_logic.dto.Customer;
-import sample.functional_logic.AlertService;
-import sample.functional_logic.controllers.RegisterController;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
-public class RegisterGUIController implements Initializable {
-    @FXML private ToggleGroup gender_group;
-    @FXML private TextField fname_input;
-    @FXML private TextField lname_input;
-    @FXML private TextField street_input;
-    @FXML private TextField hnumber_input;
-    @FXML private TextField plz_input;
-    @FXML private TextField email_input;
-    @FXML private PasswordField password_input;
-    @FXML private Label error_msg;
+public class RegisterController extends ParentController {
+    @FXML
+    private ToggleGroup gender_group;
+    @FXML
+    private TextField fname_input;
+    @FXML
+    private TextField lname_input;
+    @FXML
+    private TextField street_input;
+    @FXML
+    private TextField hnumber_input;
+    @FXML
+    private TextField plz_input;
+    @FXML
+    private TextField email_input;
+    @FXML
+    private PasswordField password_input;
+    @FXML
+    private Label error_msg;
 
-    RegisterController controller;
+    public RegisterController(GUIHandler guiHandler) {
+        super(guiHandler);
+    }
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        controller = new RegisterController();
-    }
+    public void initialize(URL url, ResourceBundle resourceBundle) {}
 
     /**
      * creates customer if form is valid and redirects to customer page
-     * @param actionEvent ae
      */
-    public void register(ActionEvent actionEvent) {
+    public void register() {
         try {
             if (isFormValid()) {
                 error_msg.setVisible(false);
-                controller.register(new Customer(
+                guiHandler.register(new Customer(
                         fname_input.getText(),
                         lname_input.getText(),
                         new Customer.Address(
@@ -63,9 +62,7 @@ public class RegisterGUIController implements Initializable {
                         password_input.getText()
                 ));
 
-                Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-                stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../views/customer/customer_page.fxml")))));
-                stage.centerOnScreen();
+                guiHandler.navigateToCustomerPage();
             } else {
                 error_msg.setVisible(true);
             }
@@ -77,13 +74,10 @@ public class RegisterGUIController implements Initializable {
 
     /**
      * redirects to login page
-     * @param actionEvent ae
      */
-    public void returnToLoginPage(ActionEvent actionEvent) {
+    public void returnToLoginPage() {
         try {
-            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("../views/login.fxml")))));
-            stage.centerOnScreen();
+            guiHandler.navigateToLoginPage();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,6 +85,7 @@ public class RegisterGUIController implements Initializable {
 
     /**
      * returns if input fields are valid
+     *
      * @return if all of input is valid
      */
     private boolean isFormValid() {
@@ -104,4 +99,6 @@ public class RegisterGUIController implements Initializable {
                 password_input.getText().length() > 0;
     }
 
+    @Override
+    public void update() {}
 }

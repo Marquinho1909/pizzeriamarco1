@@ -46,27 +46,15 @@ public class UserDAO extends DAO implements iUserDAO {
      * @throws SQLException sql exception
      */
     @Override
-    public List<Customer> getAllCustomers() throws SQLException {
-        List<Customer> users = new ArrayList<>();
-        ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id WHERE u.usertype='Customer';");
+    public List<User> getAll() throws SQLException {
+        List<User> users = new ArrayList<>();
+        ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id LEFT JOIN Coupon c ON u.addressid = c.addressid WHERE u.usertype='Customer';");
         while (result.next())
             users.add(convertToCostumer(result));
-
+        result =  connection.createStatement().executeQuery("SELECT * FROM USER u WHERE u.usertype='Admin';");
+        while (result.next())
+            users.add(convertToAdmin(result));
         return users;
-    }
-
-    /**
-     * returns coupon of customer
-     *
-     * @param customer to find coupon for
-     * @return coupon if customer has one
-     * @throws SQLException sql exception
-     */
-    @Override
-    public Optional<Coupon> getCustomerCoupon(Customer customer) throws SQLException {
-        int id = getAddressIdOfAddress(customer.getAddress());
-        if (id == 0) throw new SQLException("ADDRESS OF CUSTOMER NOT FOUND");
-        return couponDAO.getCouponByAddressId(id);
     }
 
     /**
@@ -162,7 +150,6 @@ public class UserDAO extends DAO implements iUserDAO {
      * @return address id of parameter
      * @throws SQLException sql exception
      */
-    @Override
     public int getAddressIdOfAddress(Customer.Address address) throws SQLException {
         PreparedStatement prepA = connection.prepareStatement("SELECT id FROM Address WHERE street=? AND housenumber=? AND zipcode=?;");
         prepA.setString(1, address.getStreet());
@@ -172,41 +159,6 @@ public class UserDAO extends DAO implements iUserDAO {
         if (rs.first())
             return rs.getInt(1);
         else return 0;
-    }
-
-    /**
-     * tries to find user with login credentials
-     * @param email of user
-     * @param password of user
-     * @return User if found
-     * @throws SQLException sql exception
-     */
-    @Override
-    public Optional<User> getUserByEmailAndPassword(String email, String password) throws SQLException {
-        User user;
-        PreparedStatement prep = connection.prepareStatement("SELECT * FROM User u LEFT JOIN Address a ON u.addressid = a.id WHERE email=? AND password=?;");
-        prep.setString(1, email);
-        prep.setString(2, password);
-
-        ResultSet rs = prep.executeQuery();
-        if (rs.first()) {
-            if (rs.getString("usertype").equals("Admin"))
-                user = convertToAdmin(rs);
-            else
-                user = convertToCostumer(rs);
-            return Optional.of(user);
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * makes customer to admin
-     * @param id of customer
-     * @throws SQLException sql exception
-     */
-    @Override
-    public void makeCustomerAdmin(int id) throws SQLException {
-        connection.createStatement().executeUpdate("UPDATE User SET usertype='Admin' WHERE id=" + id);
     }
 
     /**

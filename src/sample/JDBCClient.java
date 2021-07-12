@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class JDBCClient {
-    private static final String HOST = "jdbc:mysql://localhost:3309/";
+    private static final String HOST = "jdbc:mysql://localhost:3306/";
     private static final String DB = "test";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";

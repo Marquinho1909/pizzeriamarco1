@@ -1,30 +1,29 @@
-package resources.GUIController;
+package sample.GUI.controller.modal;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableView;
+import sample.GUI.GUIHandler;
+import sample.GUI.controller.Modal;
 import sample.data_logic.dto.Order;
 import sample.data_logic.dto.OrderPosition;
-import sample.functional_logic.AlertService;
-import sample.functional_logic.controllers.CustomerPageController;
-import sample.functional_logic.controllers.ModalController;
-import sample.functional_logic.controllers.OrderHistoryModalController;
+import sample.functional_logic.service.CategoryService;
 
 import java.net.URL;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class OrderHistoryModalGUIController extends ModalController implements Initializable {
+public class OrderHistoryModalController extends Modal implements Initializable {
     public TableView<TableOrder> table_order;
 
-    OrderHistoryModalController controller;
+    public OrderHistoryModalController(GUIHandler guiHandler) {
+        super(guiHandler);
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        controller = new OrderHistoryModalController();
         displayOrders();
     }
 
@@ -33,21 +32,14 @@ public class OrderHistoryModalGUIController extends ModalController implements I
      */
     public void displayOrders() {
         table_order.getItems().clear();
-        List<Order> orders;
-        try {
-            orders = controller.getOrdersFromLoggedInUser();
-            for (Order o : orders)
-                table_order.getItems().add(new TableOrder(
-                        new SimpleDateFormat("dd-MM-yyyy").format(o.getOrderDate()),
-                        o.getOrderpositions(),
-                        o.getDiscount()
-                ));
-        } catch (SQLException e) {
-            e.printStackTrace();
-            AlertService.showError();
-        }
+        List<Order> orders = guiHandler.getOrdersFromLoggedInUser();
+        for (Order o : orders)
+            table_order.getItems().add(new TableOrder(
+                    new SimpleDateFormat("dd-MM-yyyy").format(o.getOrderDate()),
+                    o.getOrderpositions(),
+                    o.getDiscount()
+            ));
     }
-
 
     /**
      * used for displaying orders in table
@@ -66,7 +58,7 @@ public class OrderHistoryModalGUIController extends ModalController implements I
                 sum += op.getAmount() * op.getDish().getPrice();
                 s.append(op.getAmount()).append("x ").append(op.getDish().getName()).append(", ");
             }
-            String st_sum = CustomerPageController.transformPrice(sum);
+            String st_sum = GUIHandler.transformPrice(sum);
 
             if (discount != 0.0)
                 st_sum += " (-" + discount * 100 + "%)";

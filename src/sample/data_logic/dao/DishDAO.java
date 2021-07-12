@@ -43,27 +43,6 @@ public class DishDAO extends DAO implements iDishDAO {
     }
 
     /**
-     * returns all active dishes in database
-     * @return list of found active dishes
-     * @throws SQLException sql exception
-     */
-    @Override
-    public List<Dish> getAllActive() throws SQLException {
-        List<Dish> dishes = new ArrayList<>();
-        ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Dish WHERE active is TRUE");
-        while (result.next()) {
-            dishes.add(new Dish(
-                    result.getInt("id"),
-                    result.getString("name"),
-                    categoryDAO.getAllByDishId(result.getInt("id")),
-                    result.getDouble("price"),
-                    result.getBoolean("active")
-            ));
-        }
-        return dishes;
-    }
-
-    /**
      * saves dish
      * @param dish to be saved
      * @return generated id key
@@ -115,17 +94,12 @@ public class DishDAO extends DAO implements iDishDAO {
             connection.createStatement().execute("DELETE FROM Dish WHERE id=" + id + ";");
     }
 
-    /**
-     * sets active for dish
-     * @param active value that active will be set
-     * @param id of dish to set active
-     * @throws SQLException sql exception
-     */
-    @Override
-    public void setActivation(boolean active, int id) throws SQLException {
-        PreparedStatement prep = connection.prepareStatement("UPDATE Dish SET active = ? WHERE id=?;");
-        prep.setBoolean(1, active);
-        prep.setInt(2, id);
+    public void update(int id, Dish dish) throws SQLException {
+        PreparedStatement prep = connection.prepareStatement("UPDATE Dish SET name=?, price=?, active=? WHERE id=?;");
+        prep.setString(1, dish.getName());
+        prep.setDouble(2, dish.getPrice());
+        prep.setBoolean(3, dish.isActive());
+        prep.setInt(4, id);
         prep.executeUpdate();
     }
 }

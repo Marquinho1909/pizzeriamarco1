@@ -1,4 +1,4 @@
-package sample.functional_logic;
+package sample.GUI;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
