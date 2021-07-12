@@ -3,6 +3,9 @@ package sample.GUI;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
+/**
+ * Class that creates simple alerts
+ */
 public class AlertService {
 
     public static ButtonType showAlert(Alert.AlertType type, String title, String content, ButtonType... buttons) {

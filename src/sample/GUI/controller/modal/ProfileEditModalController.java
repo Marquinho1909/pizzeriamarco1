@@ -22,30 +22,18 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class ProfileEditModalController extends Modal implements Initializable {
-    @FXML
-    private RadioButton t_m;
-    @FXML
-    private RadioButton t_f;
-    @FXML
-    private RadioButton t_d;
-    @FXML
-    private TextField fname_input;
-    @FXML
-    private TextField lname_input;
-    @FXML
-    private TextField street_input;
-    @FXML
-    private TextField hnumber_input;
-    @FXML
-    private TextField plz_input;
-    @FXML
-    private TextField email_input;
-    @FXML
-    private TextField password_input;
-    @FXML
-    private ToggleGroup gender_group;
-    @FXML
-    private Label error_msg;
+    @FXML private RadioButton t_m;
+    @FXML private RadioButton t_f;
+    @FXML private RadioButton t_d;
+    @FXML private TextField fname_input;
+    @FXML private TextField lname_input;
+    @FXML private TextField street_input;
+    @FXML private TextField hnumber_input;
+    @FXML private TextField plz_input;
+    @FXML private TextField email_input;
+    @FXML private TextField password_input;
+    @FXML private ToggleGroup gender_group;
+    @FXML private Label error_msg;
 
     public ProfileEditModalController(GUIHandler guiHandler) {
         super(guiHandler);
@@ -91,7 +79,7 @@ public class ProfileEditModalController extends Modal implements Initializable {
 
         try {
             if (UserSessionSingleton.currentSession().getUser().getClass() == Customer.class)
-                guiHandler.saveProfileChanges(UserSessionSingleton.currentSession().getUser().getId(),
+                guiHandler.updateProfile(UserSessionSingleton.currentSession().getUser().getId(),
                         new Customer(
                                 fname_input.getText(),
                                 lname_input.getText(),
@@ -105,7 +93,7 @@ public class ProfileEditModalController extends Modal implements Initializable {
                                 password_input.getText()
                         ));
             else
-                guiHandler.saveProfileChanges(UserSessionSingleton.currentSession().getUser().getId(),
+                guiHandler.updateProfile(UserSessionSingleton.currentSession().getUser().getId(),
                         new Admin(
                                 fname_input.getText(),
                                 lname_input.getText(),

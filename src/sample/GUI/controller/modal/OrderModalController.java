@@ -10,7 +10,6 @@ import sample.GUI.AlertService;
 import sample.GUI.GUIHandler;
 import sample.GUI.controller.Modal;
 import sample.data_logic.dto.OrderPosition;
-import sample.functional_logic.service.CategoryService;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -18,9 +17,9 @@ import java.util.Date;
 import java.util.ResourceBundle;
 
 public class OrderModalController extends Modal implements Initializable {
-    public Label orderText;
-    public CheckBox coupon_check;
-    public ListView<String> overview;
+    @FXML private Label orderText;
+    @FXML private CheckBox coupon_check;
+    @FXML private ListView<String> overview;
 
     public OrderModalController(GUIHandler guiHandler) {
         super(guiHandler);
@@ -40,7 +39,6 @@ public class OrderModalController extends Modal implements Initializable {
 
         double total = 0;
         overview.getItems().clear();
-
         coupon_check.setVisible(guiHandler.getCouponOfLoggedInUser() != null);
 
         for (OrderPosition o : guiHandler.getCart()) {
@@ -75,8 +73,8 @@ public class OrderModalController extends Modal implements Initializable {
     public void order(ActionEvent actionEvent) {
         try {
             guiHandler.order(coupon_check.isSelected(), new Date());
+            guiHandler.loadLoggedInUser();
             setStatus(ModalStatus.SUCCESS);
-
         } catch (SQLException e) {
             e.printStackTrace();
             setStatus(ModalStatus.FAILURE);

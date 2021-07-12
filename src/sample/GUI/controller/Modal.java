@@ -13,21 +13,16 @@ import java.util.ResourceBundle;
  */
 public abstract class Modal implements Initializable {
     private ModalStatus status = ModalStatus.INITIALIZED;
-
     public ModalStatus getStatus() {
         return status;
     }
-
     public void setStatus(ModalStatus status) {
         this.status = status;
     }
-
     public final GUIHandler guiHandler;
-
     public Modal(GUIHandler guiHandler) {
         this.guiHandler = guiHandler;
     }
-
     public abstract void initialize(URL url, ResourceBundle resourceBundle);
 
     /**

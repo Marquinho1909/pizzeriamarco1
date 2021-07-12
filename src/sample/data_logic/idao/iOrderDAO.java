@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface iOrderDAO {
     List<Order> getAll() throws SQLException;
-    int save(Order order) throws SQLException;
+    void save(Order order) throws SQLException;
     void deleteAll() throws SQLException;
 }

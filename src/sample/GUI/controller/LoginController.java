@@ -13,12 +13,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class LoginController extends ParentController {
-    @FXML
-    private TextField email_input;
-    @FXML
-    private PasswordField password_input;
-    @FXML
-    private Label error_msg;
+    @FXML private TextField email_input;
+    @FXML private PasswordField password_input;
+    @FXML private Label error_msg;
 
     public LoginController(GUIHandler guiHandler) {
         super(guiHandler);
@@ -60,6 +57,5 @@ public class LoginController extends ParentController {
     }
 
     @Override
-    public void update() {
-    }
+    public void update() {}
 }

@@ -24,7 +24,6 @@ public class GUIHandler {
     private LoginController loginController;
     private OrderModalController orderModalController;
     private RegisterController registerController;
-
     private DishCreationModalController dishCreationModalController;
     private OrderHistoryModalController orderHistoryModalController;
     private ProfileEditModalController profileEditModalController;
@@ -65,6 +64,9 @@ public class GUIHandler {
     }
     }
 
+    /**
+     * creates controllers
+     */
     public void initControllers() {
         adminPageController = new AdminPageController(this);
         customerPageController = new CustomerPageController(this);
@@ -76,14 +78,20 @@ public class GUIHandler {
         profileEditModalController = new ProfileEditModalController(this);
     }
 
+    /**
+     * sets observer
+     */
     public void initObserver() {
         controller.setCategoryObserver(List.of(customerPageController));
         controller.setCouponObserver(List.of());
         controller.setDishObserver(List.of(adminPageController, customerPageController));
-        controller.setOrderObserver(List.of(adminPageController));
+        controller.setOrderObserver(List.of(adminPageController, customerPageController));
         controller.setUserObserver(List.of(adminPageController, customerPageController));
     }
 
+    /**
+     * sets controller for fxml files
+     */
     public void initFXMLLoader() {
         Object[][] fxml = {{
             customerPageController, "customer/customer_page.fxml"},
@@ -100,15 +108,29 @@ public class GUIHandler {
         }
     }
 
+    /**
+     * clears session
+     */
     public void logout() {
         UserSessionSingleton.currentSession().cleanUserSession();
     }
 
+    /**
+     * creates customer and sets them as current session
+     * @param customer to be created
+     * @throws SQLException sql exception
+     */
     public void register(Customer customer) throws SQLException {
         UserSessionSingleton.currentSession().setUser(customer);
         controller.saveCustomer(customer);
     }
 
+    /**
+     * searches for email and password combination and loggs in user if found
+     * @param email of user
+     * @param password of user
+     * @return if user was logged in
+     */
     public boolean login(String email, String password) {
         Optional<User> user = getUsers().stream().filter(u ->
                 u.getEmail().equals(email) && u.getPassword().equals(password)).findFirst();
@@ -120,16 +142,30 @@ public class GUIHandler {
         return false;
     }
 
+    /**
+     * checks if dish is saved in any order, thus would not be able to delete dish
+     * @param id of dish
+     * @return if dish can be deleted
+     */
     public boolean canDishBeDeleted(int id) {
         return getOrders().stream().noneMatch(o -> o.getOrderpositions().stream().anyMatch(p -> p.getDish().getId() == id));
     }
 
+    /**
+     * @return coupon of logged in user
+     */
     public Coupon getCouponOfLoggedInUser() {
         if (controller.isUserCustomer())
             return ((Customer) UserSessionSingleton.currentSession().getUser()).getCoupon();
         else return null;
     }
 
+    /**
+     * creates and saves order with or without coupon
+     * @param coupon if coupon of logged in user was used
+     * @param date of order
+     * @throws SQLException sql exception
+     */
     public void order(boolean coupon, Date date) throws SQLException {
         controller.saveOrder(
                 new Order(
@@ -139,27 +175,53 @@ public class GUIHandler {
                         coupon ? getCouponOfLoggedInUser().getValue() : 0
                 )
         );
-
-        if (coupon) {
+        if (coupon)
             controller.deleteCouponOfLoggedInUser();
-        }
-        getCart().clear();
+
     }
 
+    /**
+     * reload and sets current session
+     */
+    public void loadLoggedInUser() {
+        UserSessionSingleton.currentSession().setUser(
+                controller.getUsers().stream().filter(
+                        u -> u.getId() == UserSessionSingleton.currentSession().getUser().getId()
+                ).findFirst().orElseThrow());
+    }
+
+    /**
+     * checks if name exists as category
+     * @param name to be checked
+     * @return if category exists
+     */
     public boolean doesCategoryExist(String name) {
         return getCategories().stream().anyMatch(c -> c.getName().equals(name));
     }
 
+    /**
+     * returns if logged in User is customer
+     * @return if logged in User is customer
+     */
     public boolean isUserCustomer() {
         return controller.isUserCustomer();
     }
 
+
+    /**
+     * returns if logged in User is admin
+     * @return if logged in User is admin
+     */
     public boolean isUserAdmin() {
         return controller.isUserAdmin();
     }
 
+    /**
+     * check if dishes have any selected category as category, if so deletion is cancelled
+     * @param categories to be checked
+     * @return if all categories can be deleted
+     */
     public boolean canAllCategoriesBeDeleted(List<Category> categories) {
-        // check if dishes have any selected category as category, if so deletion is cancelled
         for (Category category : categories)
             if (getDishes().stream().anyMatch(d -> d.getCategories().contains(category))) {
                 return false;
@@ -193,38 +255,33 @@ public class GUIHandler {
         return false;
     }
 
-    public void addOrderToCart(OrderPosition orderPosition) {
-        cart.add(orderPosition);
+    /**
+     * filters orders and returns those ordered by logged in user
+     * @return list of orders
+     */
+    public List<Order> getOrdersFromLoggedInUser() {
+        return controller.getOrders().stream()
+                .filter(o -> o.getUser().getId() == UserSessionSingleton.currentSession().getUser().getId())
+                .collect(Collectors.toList());
     }
 
-    public List<OrderPosition> getCart() {
-        return cart;
+    /**
+     * changes dish activation to whatever it is not before method call
+     * @param id of dish
+     * @throws SQLException sql exception
+     */
+    public void setDishActivation(int id) throws SQLException {
+        Dish dish = getDishes().stream().filter(d -> d.getId() == id).findFirst().orElseThrow();
+
+        dish.setActive(!dish.isActive());
+        controller.updateDish(id, dish);
     }
 
-    public void removeOrderFromCart(int id) {
-        cart.removeIf(c -> c.getId() == id);
-    }
-
-    public void deleteOrderHistory() throws SQLException {
-        controller.deleteOrderHistory();
-    }
-
-    public void deleteDish(int id) throws SQLException {
-        controller.deleteDish(id);
-    }
-
-    public void deleteCategories(List<Category> checked_categories) throws SQLException {
-        controller.deleteCategories(checked_categories);
-    }
-
-    public void saveDish(Dish dish) throws SQLException {
-        controller.saveDish(dish);
-    }
-
-    public void saveProfileChanges(int id, User user) throws SQLException {
-        controller.updateProfile(id, user);
-    }
-
+    /**
+     * converts customer to admin
+     * @param id of customer
+     * @throws SQLException sql exception
+     */
     public void makeCustomerAdmin(int id) throws SQLException {
         User user = getUsers().stream().filter(u -> u.getId() == id).findFirst().orElseThrow();
 
@@ -237,79 +294,51 @@ public class GUIHandler {
                 user.getPassword()));
     }
 
-    public void setDishActivation(int id) throws SQLException {
-        Dish dish = getDishes().stream().filter(d -> d.getId() == id).findFirst().orElseThrow();
-
-        dish.setActive(!dish.isActive());
-        controller.updateDish(id, dish);
+    //CART
+    public void addOrderToCart(OrderPosition orderPosition) {
+        cart.add(orderPosition);
     }
+    public List<OrderPosition> getCart() {
+        return cart;
+    }
+    public void clearCart() { cart.clear(); }
+    public void removeOrderFromCart(int id) {
+        cart.removeIf(c -> c.getDish().getId() == id);
+    }
+
+    //DELETE
+    public void deleteOrderHistory() throws SQLException { controller.deleteOrderHistory(); }
+    public void deleteDish(int id) throws SQLException { controller.deleteDish(id); }
+    public void deleteCategories(List<Category> checked_categories) throws SQLException { controller.deleteCategories(checked_categories); }
+
+    public void saveCategory(Category category) throws SQLException { controller.saveCategory(category); }
+    public void saveDish(Dish dish) throws SQLException { controller.saveDish(dish); }
+    public void updateProfile(int id, User user) throws SQLException { controller.updateProfile(id, user); }
+
 
     //getters for lists
-
-    public List<Customer> getCustomers() {
-        return getUsers().stream().filter(u -> u.getClass().equals(Customer.class)).map(c -> (Customer) c).collect(Collectors.toList());
-    }
-
+    public List<Customer> getCustomers() { return getUsers().stream().filter(u -> u.getClass().equals(Customer.class)).map(c -> (Customer) c).collect(Collectors.toList()); }
     public List<User> getUsers() {
         return controller.getUsers();
     }
-
     public List<Order> getOrders() {
         return controller.getOrders();
     }
-
     public List<Dish> getDishes() {
         return controller.getDishes();
     }
-
     public List<Category> getCategories() {
         return controller.getCategories();
     }
 
-    public List<Order> getOrdersFromLoggedInUser() {
-        return controller.getOrders().stream()
-                .filter(o -> o.getUser().getId() == UserSessionSingleton.currentSession().getUser().getId())
-                .collect(Collectors.toList());
-    }
-
-    public void saveCategory(Category category) throws SQLException {
-        controller.saveCategory(category);
-    }
-
-    public void navigateToRegisterPage() throws IOException {
-        router.navigateTo(registerController, "register.fxml");
-    }
-
-    public void navigateToLoginPage() throws IOException {
-        router.navigateTo(loginController, "login.fxml");
-    }
-
-    public void navigateToAdminPage() throws IOException {
-        router.navigateTo(adminPageController, "admin/admin_page.fxml");
-    }
-
-    public void navigateToCustomerPage() throws IOException {
-        router.navigateTo(customerPageController, "customer/customer_page.fxml");
-    }
-
-    public Modal.ModalStatus openDishCreationModal() throws IOException {
-        return router.openModal(dishCreationModalController, "admin/dish_creation_modal.fxml");
-    }
-
-    public Modal.ModalStatus openAdminProfileEditModal() throws IOException {
-        return router.openModal(profileEditModalController, "admin/admin_profile_edit_modal.fxml");
-    }
-
-    public Modal.ModalStatus openCustomerProfileEditModal() throws IOException {
-        return router.openModal(profileEditModalController, "customer/customer_profile_edit_modal.fxml");
-    }
-
-    public Modal.ModalStatus openOrderHistoryModal() throws IOException {
-        return router.openModal(orderHistoryModalController, "customer/order_history_modal.fxml");
-    }
-
-    public Modal.ModalStatus openOrderModal() throws IOException {
-        return router.openModal(orderModalController, "customer/order_modal.fxml");
-    }
-
+    //ROUTING
+    public void navigateToRegisterPage() throws IOException { router.navigateTo(registerController, "register.fxml"); }
+    public void navigateToLoginPage() throws IOException { router.navigateTo(loginController, "login.fxml"); }
+    public void navigateToAdminPage() throws IOException { router.navigateTo(adminPageController, "admin/admin_page.fxml"); }
+    public void navigateToCustomerPage() throws IOException { router.navigateTo(customerPageController, "customer/customer_page.fxml"); }
+    public Modal.ModalStatus openDishCreationModal() throws IOException { return router.openModal(dishCreationModalController, "admin/dish_creation_modal.fxml"); }
+    public Modal.ModalStatus openAdminProfileEditModal() throws IOException { return router.openModal(profileEditModalController, "admin/admin_profile_edit_modal.fxml"); }
+    public Modal.ModalStatus openCustomerProfileEditModal() throws IOException { return router.openModal(profileEditModalController, "customer/customer_profile_edit_modal.fxml"); }
+    public Modal.ModalStatus openOrderHistoryModal() throws IOException { return router.openModal(orderHistoryModalController, "customer/order_history_modal.fxml"); }
+    public Modal.ModalStatus openOrderModal() throws IOException { return router.openModal(orderModalController, "customer/order_modal.fxml"); }
 }

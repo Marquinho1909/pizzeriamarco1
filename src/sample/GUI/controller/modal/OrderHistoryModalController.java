@@ -2,13 +2,13 @@ package sample.GUI.controller.modal;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableView;
 import sample.GUI.GUIHandler;
 import sample.GUI.controller.Modal;
 import sample.data_logic.dto.Order;
 import sample.data_logic.dto.OrderPosition;
-import sample.functional_logic.service.CategoryService;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class OrderHistoryModalController extends Modal implements Initializable {
-    public TableView<TableOrder> table_order;
+    @FXML private TableView<TableOrder> table_order;
 
     public OrderHistoryModalController(GUIHandler guiHandler) {
         super(guiHandler);
@@ -70,23 +70,18 @@ public class OrderHistoryModalController extends Modal implements Initializable 
         public String getDate() {
             return date.get();
         }
-
         public StringProperty dateProperty() {
             return date;
         }
-
         public String getOrderlist() {
             return orderlist.get();
         }
-
         public StringProperty orderlistProperty() {
             return orderlist;
         }
-
         public String getTotal() {
             return total.get();
         }
-
         public StringProperty totalProperty() {
             return total;
         }

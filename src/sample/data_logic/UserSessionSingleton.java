@@ -26,7 +26,5 @@ public class UserSessionSingleton {
         this.user = user;
     }
 
-    public void cleanUserSession() {
-        user = null;
-    }
+    public void cleanUserSession() { user = null; }
 }

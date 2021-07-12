@@ -1,5 +1,6 @@
 package sample.GUI.controller;
 
+import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -17,7 +18,6 @@ import sample.data_logic.dto.OrderPosition;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Observable;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
  * Observer that observes ProfileEditController, when notified changes menu button name to newly edited
  */
 public class CustomerPageController extends ParentController {
-    public ComboBox<Category> categories_cb;
-    public Label error_msg;
-    public VBox dishlist;
-    public VBox cart;
-    public Label lTotal;
-    public Menu menu_btn;
+    @FXML private ComboBox<Category> categories_cb;
+    @FXML private Label error_msg;
+    @FXML private VBox dishlist;
+    @FXML private VBox cart;
+    @FXML private Label lTotal;
+    @FXML private Menu menu_btn;
 
     public CustomerPageController(GUIHandler guiHandler) {
         super(guiHandler);
@@ -38,10 +38,15 @@ public class CustomerPageController extends ParentController {
 
     @Override
     public void update() {
-        menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+        System.out.println(UserSessionSingleton.currentSession().getUser());
+        guiHandler.clearCart();
+        System.out.println("Cleared");
+        if (UserSessionSingleton.currentSession().getUser() != null)
+            menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
 
         displayCategories();
         displayDishes();
+        displayCart();
     }
 
     @Override
@@ -53,6 +58,7 @@ public class CustomerPageController extends ParentController {
      * fetches and displays all categories in filtering option of combobox
      */
     public void displayCategories() {
+        categories_cb.getSelectionModel().clearSelection();
         categories_cb.getItems().clear();
         categories_cb.getItems().add(new Category(0, "Alle anzeigen"));
         categories_cb.setValue(categories_cb.getItems().get(0));
@@ -60,6 +66,8 @@ public class CustomerPageController extends ParentController {
         categories_cb.setConverter(new StringConverter<>() {
             @Override
             public String toString(Category category) {
+                if (category == null)
+                    return "  ";
                 return category.getName();
             }
 
@@ -78,10 +86,10 @@ public class CustomerPageController extends ParentController {
     public void displayDishes() {
         dishlist.getChildren().clear();
 
-        List<Dish> filteredDishes = guiHandler.getDishes();
+        List<Dish> filteredDishes = guiHandler.getDishes().stream().filter(d -> d.isActive()).collect(Collectors.toList());
         List<Category> shownCategories;
 
-        if (categories_cb.getValue().getId() != 0) {
+        if (categories_cb.getValue() != null && categories_cb.getValue().getId() != 0) {
             filteredDishes = guiHandler.getDishes().stream().filter(d -> d.getCategories().contains(categories_cb.getValue())).collect(Collectors.toList());
             shownCategories = List.of(categories_cb.getValue());
         } else {
@@ -99,7 +107,7 @@ public class CustomerPageController extends ParentController {
                 colorDarker = !colorDarker;
             }
         }
-        if (categories_cb.getValue().getId() == 0) {
+        if (categories_cb.getValue() != null && categories_cb.getValue().getId() == 0) {
             List<Dish> uncat = guiHandler.getDishes().stream().filter(d -> d.getCategories().isEmpty()).collect(Collectors.toList());
             if (!uncat.isEmpty()) {
                 createCategoryEntry(new Category("Unkategorisiert"));
@@ -205,7 +213,7 @@ public class CustomerPageController extends ParentController {
             Button btn = new Button("Entfernen");
             btn.setPrefWidth(80);
             btn.setOnAction((e) -> {
-                guiHandler.removeOrderFromCart(o.getId());
+                guiHandler.removeOrderFromCart(o.getDish().getId());
                 displayCart();
             });
 
@@ -250,8 +258,6 @@ public class CustomerPageController extends ParentController {
             e.printStackTrace();
             AlertService.showError();
         }
-
-
     }
 
     /**

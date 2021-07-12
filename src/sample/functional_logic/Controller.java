@@ -38,96 +38,71 @@ public class Controller {
     }
 
 
-    // GETTER
-
-    public List<User> getUsers() { return userService.get(); }
-
-    public List<Order> getOrders() { return orderService.get(); }
-
-    public List<Dish> getDishes() { return dishService.get(); }
-
-    public List<Category> getCategories() { return categoryService.get(); }
-
     // UPDATE
-
     public void updateProfile(int id, User user) throws SQLException {
-        userService.update(id, user);
+        user.setId(id);
         UserSessionSingleton.currentSession().setUser(user);
+        userService.update(id, user);
     }
 
-    public void updateUser(int id, User user) throws SQLException {
-        userService.update(id, user);
-    }
+    public void updateUser(int id, User user) throws SQLException { userService.update(id, user); }
+    public void updateDish(int id, Dish dish) throws SQLException { dishService.update(id, dish); }
 
     // DELETE
-
-    public void deleteCategories(List<Category> categories) throws SQLException {
-        categoryService.delete(categories);
-    }
-
     public void deleteCouponOfLoggedInUser() throws SQLException {
         if (isUserCustomer())
             couponService.delete(((Customer)(UserSessionSingleton.currentSession().getUser())).getCoupon().getId());
+        userService.load();
     }
 
-    public void deleteOrderHistory() throws SQLException {
-        orderService.deleteAll();
+    public void deleteCategories(List<Category> categories) throws SQLException { categoryService.delete(categories); }
+    public void deleteOrderHistory() throws SQLException { orderService.deleteAll(); }
+    public void deleteDish(int id) throws SQLException { dishService.delete(id); }
+
+    /**
+     * returns if logged in User is customer
+     * @return if logged in User is customer
+     */
+    public boolean isUserCustomer() {
+        if (UserSessionSingleton.currentSession().getUser() != null)
+            return UserSessionSingleton.currentSession().getUser().getClass().equals(Customer.class);
+        return false;
     }
 
-    public void deleteDish(int id) throws SQLException {
-        dishService.delete(id);
+    /**
+     * returns if logged in User is admin
+     * @return if logged in User is admin
+     */
+    public boolean isUserAdmin() {
+        if (UserSessionSingleton.currentSession().getUser() != null)
+            return UserSessionSingleton.currentSession().getUser().getClass().equals(Admin.class);
+        return false;
     }
 
     // SAVE
-
-    public void saveCategory(Category category) throws SQLException {
-        categoryService.save(category);
-    }
-
-    public void saveDish(Dish dish) throws SQLException {
-        dishService.save(dish);
-    }
-
-    public void saveCustomer(Customer customer) throws SQLException {
-        userService.save(customer);
-    }
-
-    public void saveOrder(Order order) throws SQLException {
-        orderService.save(order);
-    }
-
-    public boolean isUserCustomer() {
-        return UserSessionSingleton.currentSession().getUser().getClass().equals(Customer.class);
-    }
-
-    public boolean isUserAdmin() {
-        return UserSessionSingleton.currentSession().getUser().getClass().equals(Admin.class);
-    }
-
-    public void updateDish(int id, Dish dish) throws SQLException {
-        dishService.update(id, dish);
-    }
+    public void saveCategory(Category category) throws SQLException { categoryService.save(category); }
+    public void saveDish(Dish dish) throws SQLException { dishService.save(dish); }
+    public void saveCustomer(Customer customer) throws SQLException { userService.save(customer); }
+    public void saveOrder(Order order) throws SQLException { orderService.save(order); }
 
     // OBSERVER SETTER
-
-    public void setCategoryObserver(List<ParentController> observers) {
-        observers.forEach(categoryService::addObserver);
-    }
-
+    public void setCategoryObserver(List<ParentController> observers) { observers.forEach(categoryService::addObserver); }
     public void setCouponObserver(List<ParentController> observers) {
         observers.forEach(couponService::addObserver);
     }
-
     public void setDishObserver(List<ParentController> observers) {
         observers.forEach(dishService::addObserver);
     }
-
     public void setOrderObserver(List<ParentController> observers) {
         observers.forEach(orderService::addObserver);
     }
-
     public void setUserObserver(List<ParentController> observers) {
         observers.forEach(userService::addObserver);
     }
 
+    // GETTER LISTS
+    public List<User> getUsers() { return userService.get(); }
+    public List<Order> getOrders() { return orderService.get(); }
+    public List<Dish> getDishes() { return dishService.get(); }
+    public List<Category> getCategories() { return categoryService.get(); }
 }

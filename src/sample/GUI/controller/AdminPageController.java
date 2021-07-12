@@ -25,14 +25,10 @@ import java.util.ResourceBundle;
  * Observer that observes ProfileEditController, when notified changes menu button name to newly edited
  */
 public class AdminPageController extends ParentController {
-    @FXML
-    public TableView<TableDish> table_dish;
-    @FXML
-    public TableView<TableCustomer> table_user;
-    @FXML
-    public TableView<TableOrder> table_order;
-    @FXML
-    public Menu menu_btn;
+    @FXML private TableView<TableDish> table_dish;
+    @FXML private TableView<TableCustomer> table_user;
+    @FXML private TableView<TableOrder> table_order;
+    @FXML private Menu menu_btn;
 
     public AdminPageController(GUIHandler guiHandler) {
         super(guiHandler);
@@ -45,7 +41,9 @@ public class AdminPageController extends ParentController {
 
     @Override
     public void update() {
-        setMenuBtnName(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
+        System.out.println("UPDATE");
+        if (UserSessionSingleton.currentSession().getUser() != null)
+            setMenuBtnName(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
         displayCustomers();
         displayOrders();
         displayDishes();
@@ -120,7 +118,6 @@ public class AdminPageController extends ParentController {
         if (result.equals(ButtonType.YES)) {
             try {
                 guiHandler.makeCustomerAdmin(tc.getId());
-                displayCustomers();
             } catch (SQLException e) {
                 e.printStackTrace();
                 AlertService.showError();
@@ -180,7 +177,7 @@ public class AdminPageController extends ParentController {
         if (td == null) return;
 
         try {
-            if (guiHandler.canDishBeDeleted(td.getId())) {
+            if (!guiHandler.canDishBeDeleted(td.getId())) {
                 AlertService.showAlert(Alert.AlertType.ERROR, "Fehlgeschlagen",
                         "Mindestens eine Bestellung in der Historie enthält dieses Gericht. Löschen Sie die Historie oder deaktivieren Sie das Gericht einfach", ButtonType.OK);
                 return;
@@ -229,6 +226,8 @@ public class AdminPageController extends ParentController {
      */
     public void changeDishActivation() {
         TableDish td = table_dish.getSelectionModel().getSelectedItem();
+        if (td == null)
+            return;
         String content = td.getActive().equals("Inaktiv") ? "Soll das Gericht wirklich aktiviert werden? Alle Kunden können es dann sehen und bestellen."
                 : "Soll das Gericht wirklich deaktiviert werden? Danach ist es bis zu Reaktivierung nicht mehr bestellbar.";
 
@@ -245,8 +244,6 @@ public class AdminPageController extends ParentController {
 
         }
     }
-
-
 
     /**
      * Class for displaying Customer in table_customer
@@ -271,27 +268,21 @@ public class AdminPageController extends ParentController {
         public int getId() {
             return id.get();
         }
-
         public void setId(int id) {
             this.id.set(id);
         }
-
         public String getFirstname() {
             return firstname.get();
         }
-
         public String getLastname() {
             return lastname.get();
         }
-
         public String getGender() {
             return gender.get();
         }
-
         public String getFullAddress() {
             return fullAddress.get();
         }
-
         public String getEmail() {
             return email.get();
         }
@@ -330,23 +321,18 @@ public class AdminPageController extends ParentController {
         public int getId() {
             return id.get();
         }
-
         public void setId(int id) {
             this.id.set(id);
         }
-
         public String getOrderlist() {
             return orderlist.get();
         }
-
         public String getTotal() {
             return total.get();
         }
-
         public int getUserid() {
             return userid.get();
         }
-
         public String getDate() {
             return date.get();
         }
@@ -382,22 +368,17 @@ public class AdminPageController extends ParentController {
         public int getId() {
             return id.get();
         }
-
         public String getName() {
             return name.get();
         }
-
         public String getCategories() {
             return categories.get();
         }
-
         public String getPrice() {
             return price.get();
         }
-
         public String getActive() {
             return active.get();
         }
-
     }
 }

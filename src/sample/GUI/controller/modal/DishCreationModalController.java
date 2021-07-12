@@ -1,6 +1,7 @@
 package sample.GUI.controller.modal;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -20,11 +21,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class DishCreationModalController extends Modal implements Initializable {
-    public Spinner<Double> price_input;
-    public TextField name_input;
-    public Label error_msg;
-    public VBox categories_list;
-    public TextField category_input;
+    @FXML private Spinner<Double> price_input;
+    @FXML private TextField name_input;
+    @FXML private Label error_msg;
+    @FXML private VBox categories_list;
+    @FXML private TextField category_input;
 
     public DishCreationModalController(GUIHandler guiHandler) {
         super(guiHandler);
@@ -119,6 +120,9 @@ public class DishCreationModalController extends Modal implements Initializable 
         }
     }
 
+    /**
+     * deletes all checked categories, first checks if any categories are in use
+     */
     public void deleteCategories() {
         List<Category> checked_categories = new ArrayList<>();
         for (Node n : categories_list.getChildren()) {

@@ -8,12 +8,8 @@ public class Customer extends User {
         super(firstName, lastname, gender, email, password);
         this.address = address;
     }
-    public Customer(int id, String firstName, String lastname, Address address, char gender, String email, String password) {
+    public Customer(int id, String firstName, String lastname, Address address, char gender, String email, String password, Coupon coupon) {
         super(id, firstName, lastname, gender, email, password);
-        this.address = address;
-    }
-    public Customer(Coupon coupon, String firstName, String lastname, Address address, char gender, String email, String password) {
-        super(firstName, lastname, gender, email, password);
         this.address = address;
         this.coupon = coupon;
     }
@@ -35,6 +31,7 @@ public class Customer extends User {
                 ", email='" + getEmail() + '\'' +
                 ", password='" + getPassword() + '\'' +
                 ", address=" + address +
+                ", coupon=" + coupon +
                 '}';
     }
 

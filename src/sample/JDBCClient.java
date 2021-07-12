@@ -106,7 +106,7 @@ public class JDBCClient {
                 logger.info("TABLE CREATED: COUPON");
                 connection.createStatement().execute(
                         "CREATE TABLE Coupon(" +
-                                "id INTEGER AUTO_INCREMENT PRIMARY KEY," +
+                                "couponid INTEGER AUTO_INCREMENT PRIMARY KEY," +
                                 "value DECIMAL(4,2)," +
                                 "addressid INTEGER," +
                                 "FOREIGN KEY(addressid) REFERENCES Address(id));"

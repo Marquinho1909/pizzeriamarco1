@@ -16,24 +16,15 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class RegisterController extends ParentController {
-    @FXML
-    private ToggleGroup gender_group;
-    @FXML
-    private TextField fname_input;
-    @FXML
-    private TextField lname_input;
-    @FXML
-    private TextField street_input;
-    @FXML
-    private TextField hnumber_input;
-    @FXML
-    private TextField plz_input;
-    @FXML
-    private TextField email_input;
-    @FXML
-    private PasswordField password_input;
-    @FXML
-    private Label error_msg;
+    @FXML private ToggleGroup gender_group;
+    @FXML private TextField fname_input;
+    @FXML private TextField lname_input;
+    @FXML private TextField street_input;
+    @FXML private TextField hnumber_input;
+    @FXML private TextField plz_input;
+    @FXML private TextField email_input;
+    @FXML private PasswordField password_input;
+    @FXML private Label error_msg;
 
     public RegisterController(GUIHandler guiHandler) {
         super(guiHandler);

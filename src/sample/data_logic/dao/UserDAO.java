@@ -25,21 +25,6 @@ public class UserDAO extends DAO implements iUserDAO {
     }
 
     /**
-     * returns user by id
-     *
-     * @param id of user
-     * @return user of id
-     * @throws SQLException sql exception
-     */
-    @Override
-    public Optional<User> get(int id) throws SQLException {
-        ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id WHERE u.id=" + id + ";");
-        if (result.first())
-            return Optional.of(convertToCustomerOrAdmin(result));
-        return Optional.empty();
-    }
-
-    /**
      * returns all customers in database
      *
      * @return all found customers
@@ -61,11 +46,10 @@ public class UserDAO extends DAO implements iUserDAO {
      * saves user and their address if user is customer, creates coupon if address is new
      *
      * @param user to be saved
-     * @return generated id key of user
      * @throws SQLException sql exception
      */
     @Override
-    public int save(User user) throws SQLException {
+    public void save(User user) throws SQLException {
         int aId = 0;
         if (user.getClass() == Customer.class) {
             Customer customer = (Customer) user;
@@ -82,7 +66,10 @@ public class UserDAO extends DAO implements iUserDAO {
 
                 if (rs.first()) {
                     aId = rs.getInt(1);
-                    couponDAO.saveByAddressId(new Coupon(0.1), aId);
+                    PreparedStatement prep = connection.prepareStatement("INSERT INTO Coupon (value, addressid) VALUES (?,?);");
+                    prep.setDouble(1, 0.1);
+                    prep.setInt(2, aId);
+                    prep.execute();
                 } else throw new SQLException("GENERATED KEY NOT FOUND");
             }
         }
@@ -104,9 +91,6 @@ public class UserDAO extends DAO implements iUserDAO {
         if (aId != 0) prep.setInt(7, aId);
 
         prep.execute();
-        ResultSet rs = prep.getGeneratedKeys();
-        if (rs.next()) return rs.getInt(1);
-        else throw new SQLException();
     }
 
     /**
@@ -132,15 +116,31 @@ public class UserDAO extends DAO implements iUserDAO {
             prepA.setInt(4, aId);
             prepA.executeUpdate();
         }
-        PreparedStatement prep = connection.prepareStatement("UPDATE User SET firstname=?, lastname=?, gender=?, email=?, password=? WHERE id=?;");
+        PreparedStatement prep = connection.prepareStatement("UPDATE User SET firstname=?, lastname=?, gender=?, email=?, password=?, usertype=? WHERE id=?;");
         prep.setString(1, user.getFirstName());
         prep.setString(2, user.getLastname());
         prep.setString(3, "" + user.getGender());
         prep.setString(4, user.getEmail());
         prep.setString(5, user.getPassword());
-        prep.setInt(6, id);
+        prep.setString(6, user.getClass().equals(Admin.class) ? "Admin" : "Customer");
+        prep.setInt(7, id);
 
         prep.executeUpdate();
+    }
+
+
+    /**
+     * returns user by id
+     *
+     * @param id of user
+     * @return user of id
+     * @throws SQLException sql exception
+     */
+    public Optional<User> get(int id) throws SQLException {
+        ResultSet result = connection.createStatement().executeQuery("SELECT * FROM USER u LEFT JOIN Address a ON u.addressid = a.id LEFT JOIN Coupon c ON u.addressid = c.addressid WHERE u.id=" + id + ";");
+        if (result.first())
+            return Optional.of(convertToCustomerOrAdmin(result));
+        return Optional.empty();
     }
 
     /**
@@ -183,6 +183,11 @@ public class UserDAO extends DAO implements iUserDAO {
      * @throws SQLException sql exception
      */
     private Customer convertToCostumer(ResultSet customer) throws SQLException {
+        Coupon coupon = new Coupon(
+                customer.getInt("couponid"),
+                customer.getDouble("value")
+        );
+
         Customer.Address address = new Customer.Address(
                 customer.getString("street"),
                 customer.getString("housenumber"),
@@ -195,7 +200,8 @@ public class UserDAO extends DAO implements iUserDAO {
                 address,
                 customer.getString("gender").charAt(0),
                 customer.getString("email"),
-                customer.getString("password"));
+                customer.getString("password"),
+                coupon.getValue() > 0 ? coupon : null);
     }
 
     private Admin convertToAdmin(ResultSet admin) throws SQLException {
