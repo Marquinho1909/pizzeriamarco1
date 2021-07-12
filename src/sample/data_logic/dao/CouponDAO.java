@@ -25,7 +25,6 @@ public class CouponDAO extends DAO implements iCouponDAO {
      */
     @Override
     public void delete(int id) throws SQLException {
-        System.out.println(id);
         connection.createStatement().execute("DELETE FROM Coupon WHERE couponid=" + id);
     }
 

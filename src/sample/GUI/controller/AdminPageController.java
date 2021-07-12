@@ -41,7 +41,6 @@ public class AdminPageController extends ParentController {
 
     @Override
     public void update() {
-        System.out.println("UPDATE");
         if (UserSessionSingleton.currentSession().getUser() != null)
             setMenuBtnName(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
         displayCustomers();

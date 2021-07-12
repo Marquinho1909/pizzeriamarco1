@@ -38,9 +38,7 @@ public class CustomerPageController extends ParentController {
 
     @Override
     public void update() {
-        System.out.println(UserSessionSingleton.currentSession().getUser());
         guiHandler.clearCart();
-        System.out.println("Cleared");
         if (UserSessionSingleton.currentSession().getUser() != null)
             menu_btn.setText(UserSessionSingleton.currentSession().getUser().getLastname() + ", " + UserSessionSingleton.currentSession().getUser().getFirstName());
 
