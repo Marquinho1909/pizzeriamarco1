@@ -1,21 +1,19 @@
 package sample.functional_logic.service;
 
 import sample.data_logic.DAOFactory;
-import sample.data_logic.dao.DAO;
 import sample.data_logic.dao.OrderDAO;
 import sample.data_logic.dto.Order;
-import sample.data_logic.dto.User;
+import sample.data_logic.idao.iOrderDAO;
 import sample.functional_logic.ParentService;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class OrderService extends ParentService {
 
     private List<Order> orders;
 
-    OrderDAO orderDAO;
+    public iOrderDAO orderDAO;
 
     public OrderService() {
         this.orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO("Order");

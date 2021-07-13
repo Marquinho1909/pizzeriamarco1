@@ -1,12 +1,9 @@
 package sample.functional_logic.service;
 
 import sample.data_logic.DAOFactory;
-import sample.data_logic.dao.CouponDAO;
 import sample.data_logic.dao.UserDAO;
-import sample.data_logic.dto.Admin;
-import sample.data_logic.dto.Coupon;
-import sample.data_logic.dto.Customer;
 import sample.data_logic.dto.User;
+import sample.data_logic.idao.iUserDAO;
 import sample.functional_logic.ParentService;
 
 import java.sql.SQLException;
@@ -14,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserService extends ParentService {
-    public UserDAO userDAO;
+    public iUserDAO userDAO;
 
     private List<User> users = new ArrayList<>();
 

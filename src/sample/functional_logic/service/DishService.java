@@ -1,9 +1,9 @@
 package sample.functional_logic.service;
 
 import sample.data_logic.DAOFactory;
-import sample.data_logic.dao.CouponDAO;
 import sample.data_logic.dao.DishDAO;
 import sample.data_logic.dto.Dish;
+import sample.data_logic.idao.iDishDAO;
 import sample.functional_logic.ParentService;
 
 import java.sql.SQLException;
@@ -13,7 +13,7 @@ import java.util.List;
 public class DishService extends ParentService {
 
     List<Dish> dishes;
-    DishDAO dishDAO;
+    public iDishDAO dishDAO;
 
     public DishService() {
         this.dishDAO = (DishDAO) DAOFactory.getInstance().getDAO("Dish");

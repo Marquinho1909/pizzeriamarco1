@@ -2,13 +2,13 @@ package sample.functional_logic.service;
 
 import sample.data_logic.DAOFactory;
 import sample.data_logic.dao.CouponDAO;
-import sample.data_logic.dao.DAO;
+import sample.data_logic.idao.iCouponDAO;
 import sample.functional_logic.ParentService;
 
 import java.sql.SQLException;
 
 public class CouponService extends ParentService {
-    CouponDAO couponDAO;
+    public iCouponDAO couponDAO;
 
     public CouponService() {
         this.couponDAO = (CouponDAO) DAOFactory.getInstance().getDAO("Coupon");

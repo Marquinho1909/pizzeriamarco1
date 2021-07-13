@@ -3,6 +3,7 @@ package sample.functional_logic.service;
 import sample.data_logic.DAOFactory;
 import sample.data_logic.dao.CategoryDAO;
 import sample.data_logic.dto.Category;
+import sample.data_logic.idao.iCategoryDAO;
 import sample.functional_logic.ParentService;
 
 import java.sql.SQLException;
@@ -16,7 +17,7 @@ public class CategoryService extends ParentService {
 
     public List<Category> categories;
 
-    CategoryDAO categoryDAO;
+    public iCategoryDAO categoryDAO;
 
     public CategoryService() {
         this.categoryDAO = (CategoryDAO) DAOFactory.getInstance().getDAO("Category");

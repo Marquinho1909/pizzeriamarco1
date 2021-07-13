@@ -12,13 +12,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Controller {
-    private UserService userService;
-    private CategoryService categoryService;
-    private CouponService couponService;
-    private OrderService orderService;
-    private DishService dishService;
-
-    private GUIHandler guiHandler;
+    UserService userService;
+    CategoryService categoryService;
+    CouponService couponService;
+    OrderService orderService;
+    DishService dishService;
 
     public Controller(UserService userService, CategoryService categoryService, CouponService couponService, OrderService orderService, DishService dishService) {
         this.userService = userService;
@@ -29,7 +27,6 @@ public class Controller {
     }
 
     public void start(GUIHandler guiHandler) {
-        this.guiHandler = guiHandler;
         userService.notifyObservers();
         categoryService.notifyObservers();
         couponService.notifyObservers();
@@ -50,8 +47,10 @@ public class Controller {
 
     // DELETE
     public void deleteCouponOfLoggedInUser() throws SQLException {
-        if (isUserCustomer())
-            couponService.delete(((Customer)(UserSessionSingleton.currentSession().getUser())).getCoupon().getId());
+        if (isUserCustomer()) {
+            couponService.delete(((Customer) (UserSessionSingleton.currentSession().getUser())).getCoupon().getId());
+            loadLoggedInUser();
+        }
         userService.load();
     }
 
@@ -59,6 +58,15 @@ public class Controller {
     public void deleteOrderHistory() throws SQLException { orderService.deleteAll(); }
     public void deleteDish(int id) throws SQLException { dishService.delete(id); }
 
+    /**
+     * reload and sets current session
+     */
+    public void loadLoggedInUser() {
+        UserSessionSingleton.currentSession().setUser(
+                getUsers().stream().filter(
+                        u -> u.getId() == UserSessionSingleton.currentSession().getUser().getId()
+                ).findFirst().orElseThrow());
+    }
     /**
      * returns if logged in User is customer
      * @return if logged in User is customer
@@ -105,4 +113,6 @@ public class Controller {
     public List<Order> getOrders() { return orderService.get(); }
     public List<Dish> getDishes() { return dishService.get(); }
     public List<Category> getCategories() { return categoryService.get(); }
+
+
 }

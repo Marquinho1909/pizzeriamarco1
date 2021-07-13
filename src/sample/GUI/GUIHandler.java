@@ -19,19 +19,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GUIHandler {
-    private AdminPageController adminPageController;
-    private CustomerPageController customerPageController;
-    private LoginController loginController;
-    private OrderModalController orderModalController;
-    private RegisterController registerController;
-    private DishCreationModalController dishCreationModalController;
-    private OrderHistoryModalController orderHistoryModalController;
-    private ProfileEditModalController profileEditModalController;
+    AdminPageController adminPageController;
+    CustomerPageController customerPageController;
+    LoginController loginController;
+    OrderModalController orderModalController;
+    RegisterController registerController;
+    DishCreationModalController dishCreationModalController;
+    OrderHistoryModalController orderHistoryModalController;
+    ProfileEditModalController profileEditModalController;
 
     private List<OrderPosition> cart;
 
     private final Controller controller;
-    private final Router router;
+    Router router;
     private final Stage stage;
 
     public GUIHandler(Controller controller, Stage stage) {
@@ -184,10 +184,7 @@ public class GUIHandler {
      * reload and sets current session
      */
     public void loadLoggedInUser() {
-        UserSessionSingleton.currentSession().setUser(
-                controller.getUsers().stream().filter(
-                        u -> u.getId() == UserSessionSingleton.currentSession().getUser().getId()
-                ).findFirst().orElseThrow());
+        controller.loadLoggedInUser();
     }
 
     /**
